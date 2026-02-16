@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The New Golden Record // INTERACTIVE MAP</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --gold-primary: #D4AF37;
+            --gold-dim: rgba(212, 175, 55, 0.2);
+            --glass-bg: rgba(10, 10, 10, 0.9);
+            --node-size: 15px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--gold-primary);
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- BACKGROUND & CANVAS --- */
+        #map-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* SVG Lines connecting nodes */
+        #constellation-lines {
+            width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            pointer-events: none; /* Let clicks pass through lines */
+        }
+        
+        line {
+            stroke: var(--gold-primary);
+            stroke-width: 1;
+            opacity: 0.3;
+        }
+
+        /* --- CLICKABLE MAP NODES --- */
+        .map-node {
+            position: absolute;
+            width: 20px; height: 20px;
+            background: var(--bg-color);
+            border: 2px solid var(--gold-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transform: translate(-50%, -50%); /* Center on coordinates */
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--gold-dim);
+        }
+
+        .map-node:hover, .map-node.active {
+            background: var(--gold-primary);
+            box-shadow: 0 0 20px var(--gold-primary);
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+
+        /* Node Labels on the Map */
+        .node-label {
+            position: absolute;
+            top: 25px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            color: var(--gold-primary);
+            background: var(--bg-color);
+            padding: 2px 5px;
+            border: 1px solid var(--gold-dim);
+            pointer-events: none;
+        }
+
+        /* --- SIDEBAR (Context) --- */
+        #sidebar {
+            width: 300px;
+            height: 100vh;
+            background: var(--glass-bg);
+            border-right: 1px solid var(--gold-primary);
+            padding: 20px;
+            position: relative;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            border-bottom: 2px solid var(--gold-primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        /* --- FLOATING CONTENT CARDS (Hidden by default) --- */
+        .content-card {
+            position: absolute;
+            right: 50px; top: 50px;
+            width: 400px;
+            background: rgba(0,0,0,0.95);
+            border: 1px solid var(--gold-primary);
+            padding: 20px;
+            z-index: 30;
+            display: none; /* Hidden */
+            box-shadow: -10px 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .content-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            border: 1px solid var(--gold-primary);
+            padding: 2px 8px;
+        }
+
+        /* --- DRAKE LOOPER SLIDERS --- */
+        .slider-row { margin-top: 15px; }
+        .slider-row label { display: block; font-size: 0.8rem; opacity: 0.8; }
+        input[type=range] { width: 100%; accent-color: var(--gold-primary); }
+
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="brand">GOLDEN_REC_V3</div>
+        <p style="font-size: 0.9rem; line-height: 1.5;">
+            > SYSTEM STATUS: ONLINE<br>
+            > AUDIO ENGINE: STANDBY<br>
+            > INSTRUCTION: Click a node on the star map to decrypt data.
+        </p>
+        <div style="margin-top: auto; font-size: 0.7rem; opacity: 0.5;">
+            COORDINATES: SAGITTARIUS A*<br>
+            OFFSET: 26,000 LY
+        </div>
+    </div>
+
+    <div id="map-container">
+        <svg id="constellation-lines">
+            <line x1="50%" y1="50%" x2="20%" y2="30%" /> <line x1="50%" y1="50%" x2="80%" y2="40%" /> <line x1="50%" y1="50%" x2="50%" y2="80%" /> </svg>
+
+        <div class="map-node active" style="top: 50%; left: 50%;" onclick="activateNode('intro', this)">
+            <div class="node-label">00. SYSTEM CORE</div>
+        </div>
+
+        <div class="map-node" style="top: 30%; left: 20%;" onclick="activateNode('universe', this)">
+            <div class="node-label">01. COSMOLOGY</div>
+        </div>
+
+        <div class="map-node" style="top: 40%; left: 80%;" onclick="activateNode('earth', this)">
+            <div class="node-label">02. BIOSPHERE</div>
+        </div>
+
+        <div class="map-node" style="top: 80%; left: 50%;" onclick="activateNode('looper', this)">
+            <div class="node-label">03. SIGNAL GEN</div>
+        </div>
+    </div>
+
+    <div id="intro" class="content-card active">
+        <div class="close-btn" onclick="closeCard()">X</div>
+        <h3>00. SYSTEM CORE</h3>
+        <p>Welcome to the New Golden Record Archive.</p>
+        <p>This network visualizes humanity's message to the stars.</p>
+        <button onclick="initAudio()" style="background:transparent; border:1px solid #D4AF37; color:#D4AF37; padding:10px; cursor:pointer; width:100%;">
+            [ INITIALIZE AUDIO ]
+        </button>
+    </div>
+
+    <div id="universe" class="content-card">
+        <div class="close-btn" onclick="closeCard()">X</div>
+        <h3>01. COSMOLOGY</h3>
+        <p><strong>Contextual Metadata:</strong></p>
+        <ul>
+            <li>Lambda-CDM Model</li>
+            <li>Fundamental Constants</li>
+            <li>Pulsar Timing Array</li>
+        </ul>
+        <div style="border: 1px solid #333; height: 50px; background: #111;"></div>
+    </div>
+
+    <div id="earth" class="content-card">
+        <div class="close-btn" onclick="closeCard()">X</div>
+        <h3>02. BIOSPHERE</h3>
+        <p><strong>Planet: Earth</strong></p>
+        <p>Geological and biological timeline data.</p>
+        <ul>
+            <li>DNA Structure</li>
+            <li>Tree of Life (OneZoom)</li>
+            <li>Anthropocene Art</li>
+        </ul>
+    </div>
+
+    <div id="looper" class="content-card">
+        <div class="close-btn" onclick="closeCard()">X</div>
+        <h3>03. SIGNAL GENERATOR</h3>
+        <p><strong>Drake Equation Synthesizer</strong></p>
+        
+        <div class="slider-row">
+            <label>R* (Star Formation Rate)</label>
+            <input type="range" id="vol-noise" min="0" max="1" step="0.01" value="0">
+        </div>
+
+        <div class="slider-row">
+            <label>f_i (Intelligence / 432Hz)</label>
+            <input type="range" id="vol-tone" min="0" max="0.5" step="0.01" value="0">
+        </div>
+
+        <div class="slider-row">
+            <label>n_e (Habitable Filter)</label>
+            <input type="range" id="val-filter" min="100" max="2000" step="10" value="500">
+        </div>
+    </div>
+
+    <script>
+        // --- INTERACTION LOGIC ---
+        function activateNode(cardId, element) {
+            // 1. Reset all nodes visual state
+            document.querySelectorAll('.map-node').forEach(node => {
+                node.classList.remove('active');
+                node.style.background = 'var(--bg-color)';
+            });
+
+            // 2. Highlight clicked node
+            element.classList.add('active');
+            element.style.background = 'var(--gold-primary)';
+
+            // 3. Hide all cards
+            document.querySelectorAll('.content-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // 4. Show target card
+            const targetCard = document.getElementById(cardId);
+            if(targetCard) {
+                targetCard.classList.add('active');
+            }
+        }
+
+        function closeCard() {
+            document.querySelectorAll('.content-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.map-node').forEach(n => n.classList.remove('active'));
+        }
+
+        // --- AUDIO ENGINE ---
+        let audioCtx, noiseGain, oscGain, filterNode;
+
+        function initAudio() {
+            if (audioCtx) return;
+            
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+
+            // MASTER GAIN
+            const master = audioCtx.createGain();
+            master.gain.value = 0.3;
+            master.connect(audioCtx.destination);
+
+            // 1. NOISE GEN (Stars)
+            const bufferSize = audioCtx.sampleRate * 2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            noise.loop = true;
+            noise.start();
+
+            // Filter (Habitability)
+            filterNode = audioCtx.createBiquadFilter();
+            filterNode.type = 'bandpass';
+            filterNode.frequency.value = 500;
+
+            noiseGain = audioCtx.createGain();
+            noiseGain.gain.value = 0;
+
+            noise.connect(filterNode).connect(noiseGain).connect(master);
+
+            // 2. TONE GEN (Intelligence)
+            const osc = audioCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = 432;
+            osc.start();
+
+            oscGain = audioCtx.createGain();
+            oscGain.gain.value = 0;
+
+            osc.connect(oscGain).connect(master);
+
+            // WIRE SLIDERS
+            document.getElementById('vol-noise').oninput = (e) => {
+                noiseGain.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
+            };
+            document.getElementById('vol-tone').oninput = (e) => {
+                oscGain.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
+            };
+            document.getElementById('val-filter').oninput = (e) => {
+                filterNode.frequency.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
+            };
+
+            alert("AUDIO INITIALIZED. Use the 'SIGNAL GEN' node to control sound.");
+        }
+    </script>
+</body>
+</html>
