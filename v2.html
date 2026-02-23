@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The New Golden Record // FRACTAL OS</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         :root {
             --bg-color: #050505;
@@ -12,465 +16,386 @@
             --gold-glow: rgba(212, 175, 55, 0.6);
             --glass-bg: rgba(10, 10, 10, 0.85);
             --text-mono: 'Courier New', Courier, monospace;
+            --text-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         * { box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--gold-primary);
             font-family: var(--text-mono);
-            height: 100vh;
-            overflow: hidden;
+            height: 100vh; overflow: hidden;
             user-select: none;
         }
 
-        /* --- CANVAS LAYER (The Map) --- */
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            cursor: crosshair;
+        /* --- LOADING SCREEN --- */
+        #loader {
+            position: fixed; inset: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 1s ease-out;
         }
 
-        /* --- UI OVERLAY --- */
-        #ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10;
-            pointer-events: none; /* Let clicks pass to canvas */
-        }
-
-        /* Top Bar */
-        .top-bar {
-            position: absolute;
-            top: 0; left: 0; width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--gold-dim);
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            pointer-events: auto;
-        }
-
-        .status-light {
-            display: inline-block;
-            width: 10px; height: 10px;
-            background: var(--gold-primary);
+        .spin-record {
+            width: 120px; height: 120px;
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--gold-primary);
-            margin-right: 10px;
-            animation: pulse 2s infinite;
+            background: radial-gradient(circle, #e6c27a 0%, #d4af37 40%, #aa8c2c 100%);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            border: 2px solid #fff;
+            animation: spin 2s linear infinite;
+            position: relative;
+        }
+        
+        .spin-record::after {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 15px; height: 15px;
+            background: var(--bg-color); border-radius: 50%;
         }
 
+        .loader-text { margin-top: 30px; letter-spacing: 5px; animation: pulse 1.5s infinite; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* --- SIDEBAR (Quick Look) --- */
-        #sidebar {
-            position: absolute;
-            top: 60px; /* Below top bar */
-            right: 0;
-            width: 350px;
-            height: calc(100% - 60px);
-            background: var(--glass-bg);
-            border-left: 1px solid var(--gold-primary);
-            backdrop-filter: blur(10px);
-            transform: translateX(100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            padding: 0;
+        /* --- CANVAS & UI OVERLAY --- */
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
         }
 
-        #sidebar.active { transform: translateX(0); }
-
-        .sidebar-header {
-            padding: 20px;
-            background: rgba(212, 175, 55, 0.1);
+        .top-bar {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 20px;
+            display: flex; justify-content: space-between;
             border-bottom: 1px solid var(--gold-dim);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
         }
 
-        .sidebar-content {
-            padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
+        #instruction-toast {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--glass-bg); padding: 10px 20px;
+            border: 1px solid var(--gold-dim); font-size: 0.8rem; opacity: 0.7;
         }
 
-        .tag-list {
-            list-style: none;
-            padding: 0;
+        /* --- CIRCULAR OVERVIEW MODAL --- */
+        #circle-modal-wrapper {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            backdrop-filter: blur(5px);
         }
 
-        .tag-item {
-            padding: 10px 0;
-            border-bottom: 1px dashed var(--gold-dim);
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-        }
-        .tag-item:last-child { border-bottom: none; }
-        .tag-val { opacity: 0.7; }
+        #circle-modal-wrapper.active { opacity: 1; pointer-events: auto; }
 
-        /* --- DETAIL VIEWS (Full Screen) --- */
+        .circle-modal {
+            width: 500px; height: 500px; background: var(--glass-bg);
+            border: 2px solid var(--gold-primary); border-radius: 50%;
+            box-shadow: 0 0 80px var(--gold-glow); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 50px;
+            text-align: center; transform: scale(0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #circle-modal-wrapper.active .circle-modal { transform: scale(1); }
+        .circle-modal h2 { margin-bottom: 15px; letter-spacing: 3px; border-bottom: 1px solid var(--gold-dim); padding-bottom: 10px; }
+        .circle-modal p { line-height: 1.5; font-size: 0.9rem; margin-bottom: 20px; }
+        
+        .btn-group { display: flex; gap: 15px; margin-top: 15px; }
+        .action-btn {
+            background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary);
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: var(--text-mono); transition: all 0.3s;
+        }
+        .action-btn:hover { background: var(--gold-primary); color: var(--bg-color); }
+
+        /* --- DEEP DIVE DETAIL VIEWS --- */
         .detail-view {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            padding: 40px;
-            overflow-y: auto;
-            pointer-events: auto;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 200; display: none;
+            flex-direction: column; padding: 60px 10%; overflow-y: auto; pointer-events: auto;
+            font-family: var(--text-sans); color: #ddd;
         }
 
-        .detail-view.active { display: flex; animation: zoomIn 0.3s forwards; }
+        .detail-view.active { display: flex; animation: zoomIn 0.4s forwards; }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
+        .detail-view h1 { color: var(--gold-primary); font-family: var(--text-mono); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--gold-primary); padding-bottom: 10px;}
+        .detail-view h3 { color: #fff; margin-top: 30px; }
+        .detail-view p, .detail-view li { line-height: 1.8; font-size: 1.1rem; max-width: 900px; }
+        
         .back-btn {
-            align-self: flex-start;
-            background: transparent;
-            border: 1px solid var(--gold-primary);
-            color: var(--gold-primary);
-            padding: 10px 20px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            font-family: var(--text-mono);
-            text-transform: uppercase;
+            align-self: flex-start; background: transparent; border: 1px solid var(--gold-primary);
+            color: var(--gold-primary); padding: 10px 20px; cursor: pointer; margin-bottom: 20px;
+            font-family: var(--text-mono); text-transform: uppercase; border-radius: 4px;
         }
         .back-btn:hover { background: var(--gold-primary); color: var(--bg-color); }
 
-        /* --- CONTENT STYLING --- */
-        h1, h2, h3 { margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px; }
-        p { line-height: 1.6; opacity: 0.9; max-width: 800px; }
-        a { color: var(--gold-primary); text-decoration: none; border-bottom: 1px solid var(--gold-dim); }
-        a:hover { background: var(--gold-primary); color: #000; }
-
-        /* Grid Layout for Detail Pages */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
+        /* --- IFRAMES & EMBEDS --- */
+        .embed-frame {
+            width: 100%; max-width: 900px; height: 500px;
+            border: 1px solid var(--gold-primary); border-radius: 8px;
+            margin: 20px 0; background: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
         }
 
-        .info-card {
-            border: 1px solid var(--gold-dim);
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.02);
+        /* --- INTERACTIVE TIMELINE CSS --- */
+        .timeline-container { margin: 40px 0; border-left: 2px solid var(--gold-primary); padding-left: 30px; position: relative; }
+        .timeline-event { margin-bottom: 30px; position: relative; cursor: pointer; transition: transform 0.3s ease; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;}
+        .timeline-event:hover { transform: translateX(10px); border-color: var(--gold-primary); }
+        .timeline-event::before {
+            content: ''; position: absolute; left: -37px; top: 20px; width: 12px; height: 12px;
+            background: var(--bg-color); border: 2px solid var(--gold-primary); border-radius: 50%;
         }
+        .timeline-time { color: var(--gold-primary); font-family: var(--text-mono); font-weight: bold; display: block; margin-bottom: 5px; }
 
-        /* --- LOOPER UI --- */
-        .looper-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 600px;
-            margin-top: 20px;
+        /* --- MATH/EQUATION BOX --- */
+        .math-box {
+            background: rgba(212, 175, 55, 0.05); border-left: 4px solid var(--gold-primary);
+            padding: 20px; margin: 20px 0; font-size: 1.2rem; overflow-x: auto;
         }
-        .control-row { display: flex; align-items: center; justify-content: space-between; }
-        input[type=range] { flex-grow: 1; margin: 0 20px; accent-color: var(--gold-primary); }
-
-        /* --- INSTRUCTIONS --- */
-        #instruction-toast {
-            position: absolute;
-            bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--glass-bg);
-            padding: 10px 20px;
-            border: 1px solid var(--gold-dim);
-            font-size: 0.8rem;
-            pointer-events: none;
-            opacity: 0.7;
-        }
+        
+        /* Citation Highlight */
+        .cite { color: var(--gold-primary); font-size: 0.9em; font-family: var(--text-mono); opacity: 0.8; text-decoration: none; border-bottom: 1px dashed var(--gold-primary); transition: all 0.3s;}
+        .cite:hover { background: var(--gold-primary); color: #000; }
 
     </style>
 </head>
 <body>
 
-    <!-- CANVAS MAP -->
+    <div id="loader">
+        <div class="spin-record"></div>
+        <div class="loader-text">INITIALIZING FRACTAL OS</div>
+    </div>
+
     <canvas id="network-canvas"></canvas>
 
-    <!-- UI LAYER -->
     <div id="ui-layer">
         <div class="top-bar">
-            <div>
-                <span class="status-light"></span>
-                <strong>GOLDEN_RECORD_V5</strong> // FRACTAL ARCHIVE
-            </div>
-            <div style="font-size: 0.8rem;">
-                COORDS: SOL SYSTEM <br>
-                MODE: EXPLORATION
-            </div>
+            <div><strong>GOLDEN_RECORD_V5</strong></div>
+            <div style="font-size: 0.8rem;">MODE: EXPLORATION</div>
         </div>
-
         <div id="instruction-toast">
-            [ CLICK NODES TO EXPAND ] &nbsp;&nbsp; [ DOUBLE CLICK LEAF FOR DETAILS ]
+            [ SINGLE CLICK: EXPAND/OVERVIEW ] &nbsp;&nbsp; [ DOUBLE CLICK: DEEP DIVE ARCHIVE ]
         </div>
+    </div>
 
-        <!-- SIDEBAR (Quick Look) -->
-        <div id="sidebar">
-            <div class="sidebar-header">
-                <h3 id="sidebar-title">NODE NAME</h3>
-                <div style="font-size: 0.7rem; opacity: 0.6;" id="sidebar-subtitle">CLASSIFICATION: TIER 1</div>
-            </div>
-            <div class="sidebar-content">
-                <p style="font-size: 0.8rem; margin-bottom: 20px;" id="sidebar-desc">Description text goes here.</p>
-                <div style="border-bottom: 1px solid var(--gold-primary); margin-bottom: 10px; font-weight: bold;">DATA FRAGMENTS:</div>
-                <ul class="tag-list" id="sidebar-list">
-                    <!-- Javascript populates this -->
-                </ul>
+    <div id="circle-modal-wrapper">
+        <div class="circle-modal">
+            <h2 id="modal-title">NODE TITLE</h2>
+            <div id="modal-content"><p>Content goes here.</p></div>
+            <div class="btn-group">
+                <button class="action-btn" id="btn-deep-dive" onclick="openDetailFromModal()">ACCESS ARCHIVE</button>
+                <button class="action-btn" onclick="closeCircleModal()">CLOSE</button>
             </div>
         </div>
     </div>
 
-    <!-- === DETAIL VIEW: HOME (CORE METADATA) === -->
-    <div id="view-home" class="detail-view">
-        <button class="back-btn" onclick="closeDetail()">← Return to Map</button>
-        <h1>ARCHIVE METADATA</h1>
-        <p>Instructions for decryption and origin coordinates.</p>
+    <div id="detail-lcdm" class="detail-view">
+        <button class="back-btn" onclick="closeDetailViews()">← Return to Map</button>
+        <h1>Cosmology & Lambda CDM</h1>
+        <p>Our most successful cosmological model is a universe comprising a nearly flat spacetime whose expansion rate is determined by cold gravitating matter and a constant vacuum energy density (\(\Lambda\)).</p>
         
-        <div class="grid-container">
-            <div class="info-card">
-                <h3>THE COVER</h3>
-                <p>New Golden Record Cover art featuring pulsar map.</p>
+        <h3>The Geometry of Spacetime</h3>
+        <p>Observations reveal that space itself changes with time. Distances between unbound objects grow according to a scale factor \(a(t)\). The geometry is described by a homogeneous, isotropic metric:</p>
+        <div class="math-box">
+            $$ ds^2 = -c^2 dt^2 + a^2(t) d\Sigma_k^2 $$
+        </div>
+
+        <h3>Expansion Governed by Energy Content</h3>
+        <p>Spacetime curvature responds to energy density and pressure. The expansion rate depends on total energy density (\(\rho\)), spatial curvature (\(k\)), and a constant vacuum term (\(\Lambda\)).</p>
+        <div class="math-box">
+            $$ H^2 = \left(\frac{\dot a}{a}\right)^2 = \frac{8\pi G}{3}\rho - \frac{k c^2}{a^2} + \frac{\Lambda c^2}{3} $$
+        </div>
+
+        <h3>Interactive Universe Timeline</h3>
+        <div class="timeline-container">
+            <div class="timeline-event">
+                <span class="timeline-time">T = 0 yrs</span>
+                <strong>The Big Bang & Inflation</strong>
+                <p>Initial expansion of the universe. Quantum fluctuations seed the macro-structure of galaxies.</p>
             </div>
-            <div class="info-card">
-                <h3>ORIGIN MAP</h3>
-                <p>Solar System configuration relative to 14 pulsars.</p>
-                <p>Reference: Sagittarius A* Black Hole.</p>
+            <div class="timeline-event">
+                <span class="timeline-time">T = 375,000 yrs</span>
+                <strong>Cosmic Microwave Background (CMB)</strong>
+                <p>The universe cools enough for protons and electrons to form neutral hydrogen. The "afterglow" light pattern is emitted, representing the initial state.</p>
             </div>
-            <div class="info-card">
-                <h3>GREETING</h3>
-                <p>Naked Waving Humans (Pioneer Plaque vector).</p>
-                <p>Instructional diagrams for playback.</p>
+            <div class="timeline-event">
+                <span class="timeline-time">T = 400 Million yrs</span>
+                <strong>The First Stars</strong>
+                <p>End of the Dark Ages. Gravity collapses gas clouds to ignite the first stellar fusion engines.</p>
+            </div>
+            <div class="timeline-event">
+                <span class="timeline-time">T = 13.77 Billion yrs</span>
+                <strong>Present Day</strong>
+                <p>Dark Energy accelerated expansion dominates. Development of complex planetary systems and biological life.</p>
             </div>
         </div>
+
+        <h3>Open Questions</h3>
+        <p>Our understanding of the universe remains incomplete. Current mysteries humanity is attempting to solve include:</p>
+        <ul>
+            <li><strong>Dark Matter:</strong> Unseen matter that exerts gravitational pull but interacts weakly with light.</li>
+            <li><strong>Consciousness:</strong> The hard problem of how objective, physical neural networks produce subjective experience.</li>
+            <li><strong>Fusion Power:</strong> Harnessing the process that powers stars to create clean, boundless energy on Earth.</li>
+        </ul>
     </div>
 
-    <!-- === DETAIL VIEW: UNIVERSE === -->
-    <div id="view-universe" class="detail-view">
-        <button class="back-btn" onclick="closeDetail()">← Return to Map</button>
-        <h1>UNIVERSE CONTEXT</h1>
-        <p>The stage upon which the human drama is played.</p>
+    <div id="detail-exoplanets" class="detail-view">
+        <button class="back-btn" onclick="closeDetailViews()">← Return to Map</button>
+        <h1>Exoplanetary Physics & Habitability</h1>
+        <p>Planet mass determines composition, atmosphere retention, internal structure, and geological activity, making it the primary driver of planetary diversity.</p>
         
-        <div class="grid-container">
-            <div class="info-card">
-                <h3>TIMELINE</h3>
-                <ul>
-                    <li><strong>0:</strong> Big Bang / Inflation</li>
-                    <li><strong>375k yrs:</strong> <a href="https://astrobites.org/2025/01/06/lambda_cdm/" target="_blank">CMB (Initial State)</a></li>
-                    <li><strong>400M yrs:</strong> First Stars</li>
-                    <li><strong>13.77B yrs:</strong> Present Day</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3>PHYSICS DASHBOARD</h3>
-                <ul>
-                    <li><strong>Standard Model:</strong> Quarks, Leptons, Bosons</li>
-                    <li><strong>Constants:</strong> c, G, h, π, e</li>
-                    <li><strong>Forces:</strong> Gravity, Electromagnetism, Strong/Weak Nuclear</li>
-                </ul>
-            </div>
-            <div class="info-card">
-                <h3>ASTRONOMY</h3>
-                <ul>
-                    <li>Galaxies & Clusters</li>
-                    <li>Star Lifecycle (Main Sequence to Black Hole)</li>
-                    <li>Exoplanets (Kepler Data)</li>
-                </ul>
-            </div>
+        <h3>Atmospheric Retention & Escape Velocity</h3>
+        <p>Higher mass means a higher escape velocity, allowing a planet to retain light gases like Hydrogen and Helium. If mass is too low, the atmosphere escapes over time. If it is too high, it becomes a thick hydrogen envelope with no rocky surface.</p>
+        <div class="math-box">
+            $$ v_{esc} = \sqrt{\frac{2GM}{R}} $$
         </div>
+
+        <h3>Thermal & Geological Evolution</h3>
+        <p>Planetary heat sources include accretional heating, radioactive decay, core formation, and tidal heating. This internal heat dictates whether plate tectonics can operate and if magnetic fields form. Earth's protective dynamo requires a liquid metallic core and sufficient mass to maintain convection.</p>
     </div>
 
-    <!-- === DETAIL VIEW: EARTH === -->
-   <div id="view-earth" class="detail-view">
-        <button class="back-btn" onclick="closeDetail()">← Return to Map</button>
-        <h1>PLANET EARTH</h1>
-        <p>The pale blue dot. Geological and biological history.</p>
+    <div id="detail-earth" class="detail-view">
+        <button class="back-btn" onclick="closeDetailViews()">← Return to Map</button>
+        <h1>Planet Earth: Geology & Biology</h1>
         
-        <div class="grid-container">
-            <div class="info-card">
-                <h3>FORMATION & CLIMATE</h3>
-                <ul>
-                    <li><strong>Classical Accretion:</strong> The early solar nebula saw dust grains clump into mountain-sized planetesimals, merging into embryos, and undergoing chaotic impacts to form terrestrial planets.</li>
-                    <li><strong>Pebble Accretion:</strong> Modern observations suggest planets formed much faster as millimeter-to-meter-sized pebbles drifted inward and were swept up by planetary cores. </li>
-                    <li><strong>Thermostat:</strong> Earth maintained liquid water over billions of years due to the carbonate-silicate geochemical cycle regulating atmospheric CO2.</li>
-                </ul>
-            </div>
-            
-            <div class="info-card">
-                <h3>EVOLUTIONARY HISTORY</h3>
-                <ul>
-                    <li><strong>Early Diversification:</strong> The fossil record shows dramatic evolutionary radiations long before modern ecosystems stabilized, such as complex cephalopods and highly diverse early mammals.</li>
-                    <li><strong>The Human Bottleneck:</strong> Human ancestors faced a near-extinction population bottleneck roughly 900,000 years ago, severely shaping modern genetic diversity. </li>
-                    <li><strong>The Ultimate Invader:</strong> <i>Homo sapiens</i> dominated the globe through a unique combination of "hyper-prosociality" and advanced projectile weapons, outcompeting other hominids.</li>
-                    <li><strong>The Great Filter:</strong> Earth's history represents highly improbable evolutionary leaps, explaining why life emerged here but appears absent elsewhere.</li>
-                </ul>
-            </div>
+        <h3>Tree of Life & Human Biology</h3>
+        <p>Interact with the phylogenetic tree below to trace evolutionary history across millions of species.</p>
+        <iframe class="embed-frame" src="https://www.onezoom.org/life/@biota=93302?vis=polytomy" title="OneZoom Tree of Life"></iframe>
+        
+        <p>Visualizing biological development and human evolution:</p>
+        <iframe class="embed-frame" src="https://www.youtube.com/embed/7GPB1sjEhIQ" title="Human Evolution YouTube Video"></iframe>
+        <p><a href="https://www.nlm.nih.gov/research/visible/mpeg/umd_video.mpg" target="_blank" class="cite">▶ EXTERNAL LINK: Download NIH Visible Human 3D Scan (.mpg)</a></p>
 
-            <div class="info-card">
-                <h3>BIOSIGNATURES</h3>
-                <ul>
-                    <li><strong>Volatile Delivery:</strong> Biological signatures rely entirely on the delivery of elements like carbon, hydrogen, nitrogen, and oxygen.</li>
-                    <li><strong>Disequilibrium:</strong> The simultaneous presence of highly reactive gases, such as abundant oxygen coexisting with methane, serves as a robust biosignature since they require a continuous biological source. </li>
-                    <li><strong>The Red Edge:</strong> Earth's most prominent surface biosignature is a distinct increase in surface reflectance caused by photosynthetic vegetation.</li>
-                </ul>
-            </div>
-        </div>
+        <h3>Planetary Formation & Climate</h3>
+        <ul>
+            <li><strong>Classical Accretion:</strong> The early solar nebula saw dust grains clump into mountain-sized planetesimals, merging into embryos, and undergoing chaotic impacts to form terrestrial planets <span class="cite">[Chambers, 2004]</span>.</li>
+            <li><strong>Pebble Accretion:</strong> Modern observations of faraway protoplanetary disks suggest planets formed much faster as millimeter-to-meter-sized pebbles drifted inward and were swept up by planetary cores <span class="cite">[Boyle, 2022]</span>.</li>
+            <li><strong>The Thermostat:</strong> Earth maintained a habitable climate and liquid water over billions of years due to the carbonate-silicate geochemical cycle regulating atmospheric CO2 <span class="cite">[Kasting et al., 1988]</span>.</li>
+        </ul>
+
+        <h3>Evolutionary History & Biosignatures</h3>
+        <ul>
+            <li><strong>The Human Bottleneck:</strong> Genomic evidence reveals human ancestors faced a near-extinction population bottleneck roughly 900,000 years ago during the Pleistocene transition, severely restricting and shaping modern genetic diversity <span class="cite">[Hu et al., 2023]</span>.</li>
+            <li><strong>The Most Invasive Species:</strong> Homo sapiens dominated the globe through a unique evolutionary combination of "hyper-prosociality" and advanced projectile weapons, allowing us to outcompete other hominids <span class="cite">[Marean, 2015]</span>.</li>
+            <li><strong>Disequilibrium:</strong> The simultaneous presence of highly reactive gases, such as abundant oxygen coexisting with methane, serves as a robust biosignature since they require a continuous biological source to replenish them <span class="cite">[Schwieterman & Leung, 2024]</span>.</li>
+        </ul>
     </div>
 
-    <div id="view-humanity" class="detail-view">
-        <button class="back-btn" onclick="closeDetail()">← Return to Map</button>
-        <h1>HUMANITY</h1>
-        <p>The messenger. Culture, struggle, and our technological footprint.</p>
+    <div id="detail-tech" class="detail-view">
+        <button class="back-btn" onclick="closeDetailViews()">← Return to Map</button>
+        <h1>Technology, Networks & Communication</h1>
         
-        <div class="grid-container">
-            <div class="info-card">
-                <h3>ARTIFICIAL INTELLIGENCE</h3>
-                <ul>
-                    <li><strong>The Automation Paradox:</strong> AI tools increase the output of individual scientists but restrict the collective focus of the field by gravitating toward established, data-rich areas instead of novel paradigms.</li>
-                    <li><strong>Human-Aware Systems:</strong> To meaningfully accelerate discovery, AI must be designed to understand human hypotheses and target collective blind spots.</li>
-                    <li><strong>The Benefit of Bias:</strong> Perfectly neutral AI induces "automation bias," causing humans to uncritically accept output; culturally or politically biased AI actually improves collective decision-making by provoking skepticism and forcing critical engagement.</li>
-                </ul>
-            </div>
+        <h3>Information Collection & Global Networks</h3>
+        <p>Humanity organizes knowledge via vast digital encyclopedias and geographical maps. Explore the interactive Wikipedia geographical database:</p>
+        <iframe class="embed-frame" src="https://wikimap.wiki/?base=map&lat=-3698329.1765&lon=3091724.9201&showAll=true&wiki=enwiki&zoom=3" title="WikiMap"></iframe>
+        <p><a href="https://www.nature.com/immersive/d41586-019-03165-4/index.html" target="_blank" class="cite">▶ EXTERNAL LINK: Nature Immersive on Scientific Data Collection</a></p>
 
-            <div class="info-card">
-                <h3>INFO THEORY & COMMS</h3>
-                <ul>
-                    <li><strong>Cosmic Communication:</strong> Narrow-band radio transmissions remain one of the most efficient known methods for interstellar communication. </li>
-                    <li><strong>Technosignatures:</strong> The search for radio signals helps us define the practical limits and possibilities of information transmission and signal processing on a cosmic scale.</li>
-                    <li><strong>Global Networks:</strong> Mobile phones and the internet enabled unprecedented mass communication and global information flows.</li>
-                </ul>
-            </div>
-
-            <div class="info-card">
-                <h3>CULTURAL & SOCIAL</h3>
-                <ul>
-                    <li><strong>Music:</strong> Bach, Tinariwen, Throat Singing, R&B</li>
-                    <li><strong>Social Movements:</strong> Equality, Black Lives Matter, Trans rights, Women's rights.</li>
-                    <li><strong>Greetings:</strong> All languages, sign language, Braille, laughter, heartbeat, and footsteps.</li>
-                </ul>
-            </div>
-        </div>
+        <h3>Artificial Intelligence in Science</h3>
+        <ul>
+            <li><strong>The Automation Paradox:</strong> AI tools drastically increase the output and impact of individual scientists, but they simultaneously restrict the collective focus of the scientific field. AI-augmented research tends to gravitate toward established, data-rich areas, automating existing paradigms rather than exploring completely novel ones <span class="cite">[Hao et al., forthcoming]</span>.</li>
+            <li><strong>Human-Aware Systems:</strong> For AI to meaningfully accelerate scientific discovery, it must be designed as "human-aware" to understand human hypotheses. These systems can target our collective blind spots and suggest the novel, unexplored connections we naturally miss <span class="cite">[Sourati & Evans, 2023]</span>.</li>
+            <li><strong>The Benefit of Bias:</strong> Perfectly neutral AI systems induce "automation bias," causing humans to uncritically accept the AI's output. Introducing culturally or politically biased AI actually improves collective human decision-making by provoking skepticism and forcing users to critically engage with the information <span class="cite">[Lai et al., 2025]</span>.</li>
+        </ul>
     </div>
 
-    <!-- === DETAIL VIEW: SIGNAL (LOOPER) === -->
-    <div id="view-signal" class="detail-view">
-        <button class="back-btn" onclick="closeDetail()">← Return to Map</button>
-        <button class="back-btn" onclick="initAudio()" style="margin-left: 10px; border-color: white; color: white;">▶ ACTIVATE AUDIO ENGINE</button>
+    <div id="detail-humanity" class="detail-view">
+        <button class="back-btn" onclick="closeDetailViews()">← Return to Map</button>
+        <h1>Humanity: Culture, Struggle, & Expression</h1>
         
-        <h1>THE SIGNAL GENERATOR</h1>
-        <p>Drake Equation Synthesizer. Tune the variables to filter the cosmic noise into civilization.</p>
-        
-        <div class="info-card" style="max-width: 800px; margin: 0 auto;">
-            <div class="looper-controls">
-                
-                <div class="control-row">
-                    <label><strong>R* (Star Formation)</strong><br><span style="font-size:0.7rem">Noise Volume</span></label>
-                    <input type="range" id="slider-noise" min="0" max="1" step="0.01" value="0">
-                </div>
+        <h3>Voices, Sounds, Music & Play</h3>
+        <p>Interactive synthesis of elements. Play the digital game below to see how fundamental building blocks construct complex concepts.</p>
+        <iframe class="embed-frame" src="https://littlealchemy.com/" title="Little Alchemy Game"></iframe>
+        <ul>
+            <li><strong>Music:</strong> Classical, R&B, World (percussion, folk), House, Jazz, Mongolian throat singing, Tartar relena, Tinariwen, Adrianne Lenker.</li>
+            <li><strong>Film:</strong> Utilizing narrative structure, such as James Cameron's <em>Avatar</em>, to tell stories about biology and colonization.</li>
+        </ul>
 
-                <div class="control-row">
-                    <label><strong>n_e (Habitability)</strong><br><span style="font-size:0.7rem">Filter Freq</span></label>
-                    <input type="range" id="slider-filter" min="100" max="2000" step="10" value="500">
-                </div>
+        <h3>Social Movements, Ethics & Stories</h3>
+        <ul>
+            <li><strong>Equality & Movements:</strong> Social progress driven by collective action. This includes racial/ethnic movements (Palestine, BLM, FUCK ICE) and gender movements (trans rights, women's rights).</li>
+            <li><strong>Ethics & Stories:</strong> The human condition is defined by personal narratives. <a href="https://storycorps.org/stories/" target="_blank" class="cite">▶ EXTERNAL LINK: Explore the StoryCorps Oral History Archive</a></li>
+        </ul>
 
-                <div class="control-row">
-                    <label><strong>f_i (Intelligence)</strong><br><span style="font-size:0.7rem">432Hz Tone</span></label>
-                    <input type="range" id="slider-tone" min="0" max="0.5" step="0.01" value="0">
-                </div>
-
-                <div class="control-row">
-                    <label><strong>L (Longevity)</strong><br><span style="font-size:0.7rem">Echo/Delay</span></label>
-                    <input type="range" id="slider-delay" min="0" max="0.9" step="0.01" value="0">
-                </div>
-
-            </div>
-            <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; opacity: 0.6;">
-                N = R* · fp · ne · fl · fi · fc · L
-            </div>
-        </div>
+        <h3>Greetings & Universal Connections</h3>
+        <p><em>"No languages left behind."</em></p>
+        <ul>
+            <li>Sign Language & Braille.</li>
+            <li>Universal biological signatures: Laughter, breathing, heartbeat, footsteps.</li>
+        </ul>
     </div>
 
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- DATA STRUCTURE (FRACTAL TREE) ---
-        // Types: 'root', 'category', 'leaf'
+        // --- LOADER ---
+        window.onload = () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }, 1500);
+        };
+
+        // --- DATA TREE ---
         const DATA_TREE = {
             id: "root", label: "GOLDEN RECORD", type: "root",
             children: [
                 {
-                    id: "meta", label: "METADATA", type: "category",
-                    desc: "Home Page: Instructions, Cover, and Maps.",
-                    viewId: "view-home",
-                    children: [
-                        { id: "cover", label: "COVER ART", type: "leaf", tags: ["Pulsar Map", "Etchings"], viewId: "view-home" },
-                        { id: "map", label: "SOLAR MAP", type: "leaf", tags: ["Sagittarius A*", "Coordinates"], viewId: "view-home" },
-                        { id: "inst", label: "INSTRUCTIONS", type: "leaf", tags: ["Playback Speed", "Decoding"], viewId: "view-home" },
-                        { id: "greet", label: "GREETING", type: "leaf", tags: ["Naked Humans", "Wave"], viewId: "view-home" }
-                    ]
-                },
-                {
                     id: "universe", label: "UNIVERSE", type: "category",
-                    desc: "Physical context of the cosmos.",
-                    viewId: "view-universe",
                     children: [
-                        { id: "timeline", label: "TIMELINE", type: "leaf", tags: ["Big Bang", "CMB", "Inflation"], viewId: "view-universe" },
-                        { id: "physics", label: "PHYSICS", type: "leaf", tags: ["Standard Model", "Constants", "Forces"], viewId: "view-universe" },
-                        { id: "astro", label: "ASTRONOMY", type: "leaf", tags: ["Galaxies", "Stars", "Exoplanets"], viewId: "view-universe" }
+                        {
+                            id: "cosmology", label: "COSMOLOGY", type: "category",
+                            children: [
+                                { id: "lcdm", label: "LAMBDA CDM", type: "leaf", detailId: "detail-lcdm", content: "Lambda CDM model, universe timeline, and unsolved mysteries like Dark Matter and Consciousness." }
+                            ]
+                        },
+                        {
+                            id: "exoplanets", label: "EXOPLANETS", type: "category",
+                            children: [
+                                { id: "mass-hab", label: "PLANET PHYSICS", type: "leaf", detailId: "detail-exoplanets", content: "Planetary mass determines atmosphere retention and habitability." }
+                            ]
+                        }
                     ]
                 },
                 {
                     id: "earth", label: "EARTH", type: "category",
-                    desc: "Planetary history and biology.",
-                    viewId: "view-earth",
                     children: [
-                        { id: "geo", label: "GEOLOGY", type: "leaf", tags: ["Formation", "Tectonics", "Atmosphere"], viewId: "view-earth" },
-                        { id: "bio", label: "BIOLOGY", type: "leaf", tags: ["Evolution", "Tree of Life", "Biosignatures"], viewId: "view-earth" }
+                        { id: "geo", label: "GEOLOGY", type: "leaf", detailId: "detail-earth", content: "Earth formed via accretion [Chambers, 2004; Boyle, 2022]. A dynamic silicate-carbonate cycle acts as a thermostat to maintain habitability [Kasting et al., 1988]." },
+                        { id: "bio", label: "BIOLOGY & TREE", type: "leaf", detailId: "detail-earth", content: "Interactive Tree of Life, genetic bottlenecks [Hu et al., 2023], and biosignatures [Schwieterman & Leung, 2024]." }
+                    ]
+                },
+                {
+                    id: "tech", label: "TECHNOLOGY", type: "category",
+                    children: [
+                        { id: "ai", label: "AI IN SCIENCE", type: "leaf", detailId: "detail-tech", content: "AI expands individual scientific impact but contracts collective focus [Hao et al., forthcoming]. Biased AI can improve collective decision-making [Lai et al., 2025]." },
+                        { id: "info", label: "INFO & NETWORKS", type: "leaf", detailId: "detail-tech", content: "Global knowledge structures like WikiMap and mechanisms for data collection." }
                     ]
                 },
                 {
                     id: "humanity", label: "HUMANITY", type: "category",
-                    desc: "The species. Culture, science, and society.",
-                    viewId: "view-humanity",
                     children: [
-                        { id: "culture", label: "CULTURAL", type: "leaf", tags: ["Art", "Music", "Visual Art", "Film"], viewId: "view-humanity" },
-                        { id: "tech", label: "TECH/SCI", type: "leaf", tags: ["AI", "Phones", "Info Theory"], viewId: "view-humanity" },
-                        { id: "social", label: "SOCIAL", type: "leaf", tags: ["Greetings", "Emotions", "Movements"], viewId: "view-humanity" }
-                    ]
-                },
-                {
-                    id: "signal", label: "SIGNAL", type: "category",
-                    desc: "Communication tools.",
-                    viewId: "view-signal",
-                    children: [
-                        { id: "drake", label: "DRAKE EQ", type: "leaf", tags: ["N = R*...", "Variables"], viewId: "view-signal" },
-                        { id: "audio", label: "LOOPER", type: "leaf", tags: ["432 Hz", "Synth", "Audio Engine"], viewId: "view-signal" }
+                        { id: "culture", label: "ARTS & PLAY", type: "leaf", detailId: "detail-humanity", content: "Interactive Alchemy game, film, and global music traditions." },
+                        { id: "social", label: "SOCIAL JUSTICE", type: "leaf", detailId: "detail-humanity", content: "StoryCorps archives, universal greetings, and modern social movements for equality." }
                     ]
                 }
             ]
         };
 
-        // --- STATE MANAGEMENT ---
+        // --- STATE & PHYSICS ENGINE ---
         let visibleNodes = [];
         let visibleLinks = [];
+        let activeDetailId = null;
 
-        // Initialize with Root
         function initTree() {
-            // Root
             const root = { ...DATA_TREE, x: window.innerWidth/2, y: window.innerHeight/2, vx: 0, vy: 0, expanded: false };
-            delete root.children; // Don't copy children structure directly into flat node
-            visibleNodes.push(root);
+            delete root.children; visibleNodes.push(root);
         }
 
         function getChildrenFromTree(nodeId) {
-            // Find the node in the static DATA_TREE to get its children definition
             const findNode = (node, id) => {
                 if (node.id === id) return node;
                 if (node.children) {
@@ -487,343 +412,178 @@
 
         function toggleExpansion(node) {
             if (node.expanded) {
-                // COLLAPSE: Remove all descendants
                 const collapse = (parentId) => {
-                    // Find children connected to this parent
                     const childrenLinks = visibleLinks.filter(l => l.source === parentId);
                     childrenLinks.forEach(link => {
                         const childId = link.target;
                         const childNode = visibleNodes.find(n => n.id === childId);
                         if (childNode) {
-                            // Recursively collapse child if expanded
                             if (childNode.expanded) collapse(childId);
-                            // Remove child node and link
                             visibleNodes = visibleNodes.filter(n => n.id !== childId);
                             visibleLinks = visibleLinks.filter(l => l.target !== childId);
                         }
                     });
                 };
-                collapse(node.id);
-                node.expanded = false;
+                collapse(node.id); node.expanded = false;
             } else {
-                // EXPAND: Add children
                 const childrenDefs = getChildrenFromTree(node.id);
-                if (!childrenDefs || childrenDefs.length === 0) return; // No children to add
-
+                if (!childrenDefs || childrenDefs.length === 0) return;
                 childrenDefs.forEach(def => {
                     const newNode = {
-                        ...def,
-                        x: node.x + (Math.random() - 0.5) * 50, // Spawn close to parent
-                        y: node.y + (Math.random() - 0.5) * 50,
-                        vx: 0, vy: 0,
-                        expanded: false
+                        ...def, x: node.x + (Math.random() - 0.5) * 80, y: node.y + (Math.random() - 0.5) * 80,
+                        vx: 0, vy: 0, expanded: false
                     };
-                    delete newNode.children; // Keep flat
-                    
+                    delete newNode.children; 
                     if (!visibleNodes.find(n => n.id === newNode.id)) {
-                        visibleNodes.push(newNode);
-                        visibleLinks.push({ source: node.id, target: newNode.id });
+                        visibleNodes.push(newNode); visibleLinks.push({ source: node.id, target: newNode.id });
                     }
                 });
                 node.expanded = true;
             }
         }
 
-        // --- PHYSICS ENGINE SETUP ---
         const canvas = document.getElementById('network-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
 
-        function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            // Re-center root if exists
-            const root = visibleNodes.find(n => n.type === 'root');
-            if(root && !root.expanded) {
-                root.x = width/2; root.y = height/2;
-            }
-        }
+        function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; }
         window.addEventListener('resize', resize);
-        
-        // Init
-        initTree();
-        resize();
+        initTree(); resize();
 
-        // --- INTERACTION VARIABLES ---
         let hoveredNode = null;
         let clickTimeout = null;
-        const sidebar = document.getElementById('sidebar');
 
-        // --- SIMULATION LOOP ---
         function updatePhysics() {
-            // 1. Repulsion
             for (let i = 0; i < visibleNodes.length; i++) {
                 for (let j = i + 1; j < visibleNodes.length; j++) {
-                    const n1 = visibleNodes[i];
-                    const n2 = visibleNodes[j];
-                    const dx = n1.x - n2.x;
-                    const dy = n1.y - n2.y;
+                    const n1 = visibleNodes[i]; const n2 = visibleNodes[j];
+                    const dx = n1.x - n2.x; const dy = n1.y - n2.y;
                     const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-                    
-                    const forceStrength = 2000;
-                    const force = forceStrength / (dist * dist);
-                    const fx = (dx/dist) * force;
-                    const fy = (dy/dist) * force;
-
-                    n1.vx += fx; n1.vy += fy;
-                    n2.vx -= fx; n2.vy -= fy;
+                    const force = 1500 / (dist * dist);
+                    const fx = (dx/dist) * force; const fy = (dy/dist) * force;
+                    n1.vx += fx; n1.vy += fy; n2.vx -= fx; n2.vy -= fy;
                 }
             }
-
-            // 2. Links (Spring)
             visibleLinks.forEach(link => {
                 const src = visibleNodes.find(n => n.id === link.source);
                 const tgt = visibleNodes.find(n => n.id === link.target);
                 if(src && tgt) {
-                    const dx = tgt.x - src.x;
-                    const dy = tgt.y - src.y;
+                    const dx = tgt.x - src.x; const dy = tgt.y - src.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    // Root-Category links are longer than Category-Leaf links
-                    const restLength = src.type === 'root' ? 150 : 100;
-                    
-                    const force = (dist - restLength) * 0.05;
-                    const fx = (dx/dist) * force;
-                    const fy = (dy/dist) * force;
-                    
-                    src.vx += fx; src.vy += fy;
-                    tgt.vx -= fx; tgt.vy -= fy;
+                    const restLength = src.type === 'root' ? 180 : 120;
+                    const force = (dist - restLength) * 0.02;
+                    src.vx += (dx/dist) * force; src.vy += (dy/dist) * force;
+                    tgt.vx -= (dx/dist) * force; tgt.vy -= (dy/dist) * force;
                 }
             });
-
-            // 3. Center Gravity & Update
             visibleNodes.forEach(node => {
-                // Pull to center
-                node.vx += (width/2 - node.x) * 0.0005;
-                node.vy += (height/2 - node.y) * 0.0005;
-
-                // Friction
-                node.vx *= 0.85;
-                node.vy *= 0.85;
-
-                node.x += node.vx;
-                node.y += node.vy;
+                node.vx += (width/2 - node.x) * 0.0003; node.vy += (height/2 - node.y) * 0.0003;
+                node.vx *= 0.75; node.vy *= 0.75;
+                const speed = Math.sqrt(node.vx*node.vx + node.vy*node.vy);
+                if (speed > 8) { node.vx = (node.vx/speed) * 8; node.vy = (node.vy/speed) * 8; }
+                node.x += node.vx; node.y += node.vy;
             });
         }
 
         function draw() {
             ctx.clearRect(0, 0, width, height);
-
-            // Draw Links
-            ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.lineWidth = 2;
             visibleLinks.forEach(link => {
                 const src = visibleNodes.find(n => n.id === link.source);
                 const tgt = visibleNodes.find(n => n.id === link.target);
-                if(src && tgt) {
-                    ctx.beginPath();
-                    ctx.moveTo(src.x, src.y);
-                    ctx.lineTo(tgt.x, tgt.y);
-                    ctx.stroke();
-                }
+                if(src && tgt) { ctx.beginPath(); ctx.moveTo(src.x, src.y); ctx.lineTo(tgt.x, tgt.y); ctx.stroke(); }
             });
 
-            // Draw Nodes
             visibleNodes.forEach(node => {
                 const isHover = (node === hoveredNode);
-                
-                // Size based on type
-                let radius = 10;
-                if (node.type === 'root') radius = 30;
-                else if (node.type === 'category') radius = 20;
-                else radius = 10;
+                let radius = node.type === 'root' ? 45 : (node.type === 'category' ? 30 : 20);
+                if (isHover) radius *= 1.1;
 
-                if (isHover) radius *= 1.2;
-
-                // Glow for Root/Category
                 if (node.type !== 'leaf' || isHover) {
-                    ctx.beginPath();
-                    ctx.arc(node.x, node.y, radius + 10, 0, Math.PI*2);
-                    ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
-                    ctx.fill();
+                    ctx.beginPath(); ctx.arc(node.x, node.y, radius + 15, 0, Math.PI*2);
+                    ctx.fillStyle = 'rgba(212, 175, 55, 0.15)'; ctx.fill();
                 }
 
-                // Node Body
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, radius, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(node.x, node.y, radius, 0, Math.PI*2);
                 ctx.fillStyle = node.type === 'root' ? '#D4AF37' : '#050505';
-                ctx.strokeStyle = '#D4AF37';
-                ctx.lineWidth = node.type === 'leaf' ? 1 : 2;
-                ctx.fill();
-                ctx.stroke();
+                ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = node.type === 'leaf' ? 2 : 3;
+                ctx.fill(); ctx.stroke();
 
-                // Label
-                ctx.fillStyle = '#D4AF37';
-                ctx.font = node.type === 'root' ? 'bold 14px Courier New' : '10px Courier New';
+                ctx.fillStyle = '#D4AF37'; ctx.font = node.type === 'root' ? 'bold 16px Courier New' : '12px Courier New';
                 ctx.textAlign = 'center';
-                // Only show labels for non-leaf or hovered nodes to reduce clutter
-                if (node.type !== 'leaf' || isHover || visibleNodes.length < 10) {
-                    ctx.fillText(node.label, node.x, node.y + radius + 15);
+                if (node.type !== 'leaf' || isHover || visibleNodes.length < 15) {
+                    ctx.fillText(node.label, node.x, node.y + radius + 20);
                 }
             });
-
-            updatePhysics();
-            requestAnimationFrame(draw);
+            updatePhysics(); requestAnimationFrame(draw);
         }
         draw();
 
         // --- MOUSE INTERACTIONS ---
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
-
-            hoveredNode = null;
-            let cursor = 'default';
+            const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
+            hoveredNode = null; let cursor = 'default';
             visibleNodes.forEach(node => {
-                const dx = mouseX - node.x;
-                const dy = mouseY - node.y;
-                const rad = node.type === 'root' ? 30 : (node.type === 'category' ? 20 : 10);
-                if (Math.sqrt(dx*dx + dy*dy) < rad + 5) {
-                    hoveredNode = node;
-                    cursor = 'pointer';
-                }
+                const rad = node.type === 'root' ? 45 : (node.type === 'category' ? 30 : 20);
+                const dx = mouseX - node.x; const dy = mouseY - node.y;
+                if (Math.sqrt(dx*dx + dy*dy) < rad + 10) { hoveredNode = node; cursor = 'pointer'; }
             });
             canvas.style.cursor = cursor;
         });
 
-        canvas.addEventListener('click', (e) => {
-            if (!hoveredNode) {
-                // Clicked empty space
-                sidebar.classList.remove('active');
-                return;
-            }
-
-            // --- BUG FIX ---
-            // Capture the node *synchronously* when the click happens.
-            // If we access `hoveredNode` inside the setTimeout later, 
-            // it might be null if the user moved the mouse away.
+        canvas.addEventListener('click', () => {
+            if (!hoveredNode) return;
             const clickedNode = hoveredNode; 
 
             if (clickTimeout) {
                 // DOUBLE CLICK
                 clearTimeout(clickTimeout);
                 clickTimeout = null;
-                // Double click always opens detail view if available
-                if (clickedNode.viewId) {
-                    openDetailView(clickedNode.viewId);
+                if (clickedNode.type === 'leaf' && clickedNode.detailId) {
+                    openDetailView(clickedNode.detailId);
                 }
             } else {
                 // SINGLE CLICK
                 clickTimeout = setTimeout(() => {
                     clickTimeout = null;
-                    
-                    // Logic:
-                    // If node is Leaf -> Open Sidebar
-                    // If node is Category/Root -> Toggle Expansion
-                    
                     if (clickedNode.type === 'leaf') {
-                         openSidebar(clickedNode);
+                        openCircleModal(clickedNode);
                     } else {
                         toggleExpansion(clickedNode);
                     }
-                }, 250);
+                }, 250); 
             }
         });
 
-        // --- UI FUNCTIONS ---
-        function openSidebar(node) {
-            document.getElementById('sidebar-title').innerText = node.label;
-            document.getElementById('sidebar-subtitle').innerText = "TYPE: " + node.type.toUpperCase();
-            document.getElementById('sidebar-desc').innerText = node.desc || "Data Fragment.";
-            
-            const list = document.getElementById('sidebar-list');
-            list.innerHTML = '';
-            if (node.tags) {
-                node.tags.forEach(tag => {
-                    const li = document.createElement('li');
-                    li.className = 'tag-item';
-                    li.innerHTML = `<span>${tag}</span><span class="tag-val">::</span>`;
-                    list.appendChild(li);
-                });
-            } else {
-                 list.innerHTML = '<li class="tag-item">No specific tags. Double click to view details.</li>';
-            }
-
-            sidebar.classList.add('active');
+        // --- UI MODAL & DETAIL LOGIC ---
+        function openCircleModal(node) {
+            document.getElementById('modal-title').innerText = node.label;
+            document.getElementById('modal-content').innerHTML = `<p>${node.content}</p>`;
+            activeDetailId = node.detailId; 
+            document.getElementById('circle-modal-wrapper').classList.add('active');
         }
 
-        function openDetailView(viewId) {
-            sidebar.classList.remove('active');
-            const view = document.getElementById(viewId);
+        function closeCircleModal() {
+            document.getElementById('circle-modal-wrapper').classList.remove('active');
+            activeDetailId = null;
+        }
+
+        function openDetailFromModal() {
+            if (activeDetailId) openDetailView(activeDetailId);
+        }
+
+        function openDetailView(detailId) {
+            closeCircleModal(); 
+            const view = document.getElementById(detailId);
             if(view) {
                 view.classList.add('active');
+                if (window.MathJax) MathJax.typesetPromise([view]);
             }
         }
 
-        function closeDetail() {
+        function closeDetailViews() {
             document.querySelectorAll('.detail-view').forEach(v => v.classList.remove('active'));
-        }
-
-        // --- AUDIO ENGINE ---
-        let audioCtx, noiseGain, oscGain, filterNode, delayFeedback;
-        let isAudioInit = false;
-
-        function initAudio() {
-            if(isAudioInit) return;
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            audioCtx = new AudioContext();
-
-            const master = audioCtx.createGain();
-            master.gain.value = 0.5;
-            master.connect(audioCtx.destination);
-
-            // Noise
-            const bSize = 2 * audioCtx.sampleRate;
-            const b = audioCtx.createBuffer(1, bSize, audioCtx.sampleRate);
-            const d = b.getChannelData(0);
-            for(let i=0; i<bSize; i++) d[i] = (Math.random()*2-1)*0.5;
-            const noise = audioCtx.createBufferSource();
-            noise.buffer = b;
-            noise.loop = true;
-            noise.start();
-
-            filterNode = audioCtx.createBiquadFilter();
-            filterNode.type = 'bandpass';
-            filterNode.frequency.value = 500;
-            
-            noiseGain = audioCtx.createGain();
-            noiseGain.gain.value = 0;
-
-            noise.connect(filterNode).connect(noiseGain).connect(master);
-
-            // Tone
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = 432;
-            osc.start();
-
-            oscGain = audioCtx.createGain();
-            oscGain.gain.value = 0;
-            osc.connect(oscGain).connect(master);
-
-            // Delay
-            const delay = audioCtx.createDelay();
-            delay.delayTime.value = 0.5;
-            delayFeedback = audioCtx.createGain();
-            delayFeedback.gain.value = 0;
-            master.connect(delay).connect(delayFeedback).connect(delay).connect(audioCtx.destination);
-
-            // Bind inputs
-            document.getElementById('slider-noise').oninput = e => noiseGain.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
-            document.getElementById('slider-filter').oninput = e => filterNode.frequency.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
-            document.getElementById('slider-tone').oninput = e => oscGain.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
-            document.getElementById('slider-delay').oninput = e => delayFeedback.gain.setTargetAtTime(e.target.value, audioCtx.currentTime, 0.1);
-
-            isAudioInit = true;
-            alert("AUDIO ENGINE ONLINE.");
         }
 
     </script>

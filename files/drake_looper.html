@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drake Equation Looper — The New Golden Record</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C8A84B;
+            --gold-light: #E8C96A;
+            --gold-pale: rgba(200,168,75,0.08);
+            --gold-border: rgba(200,168,75,0.20);
+            --bg: #060605;
+            --bg-card: #0D0C0A;
+            --bg-raised: #121109;
+            --text: #C0B89A;
+            --text-dim: #5A5040;
+            --text-bright: #EDE4CC;
+            --mono: 'Space Mono', monospace;
+            --serif: 'Cormorant Garamond', Georgia, serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: var(--mono); min-height: 100vh;
+            display: flex; flex-direction: column; overflow-x: hidden;
+        }
+
+        header {
+            padding: 24px 36px 18px;
+            border-bottom: 1px solid var(--gold-border);
+            display: flex; justify-content: space-between; align-items: flex-end;
+            flex-shrink: 0;
+        }
+        header h1 { font-family: var(--serif); font-size: clamp(1.4rem,3vw,2rem); font-weight:300; color:var(--text-bright); line-height:1.1; }
+        header h1 em { font-style:italic; color:var(--gold); }
+        header p { font-size:0.52rem; letter-spacing:0.22em; color:var(--text-dim); margin-top:5px; }
+        .back-link { font-size:0.54rem; letter-spacing:0.16em; color:var(--text-dim); text-decoration:none; border:1px solid var(--gold-border); padding:7px 14px; transition:all 0.25s; }
+        .back-link:hover { color:var(--gold); border-color:var(--gold); }
+
+        /* LAYOUT */
+        main { display:grid; grid-template-columns:1fr 280px; flex:1; min-height:0; }
+
+        /* LEFT */
+        .left { padding:24px 28px; border-right:1px solid var(--gold-border); overflow-y:auto; display:flex; flex-direction:column; gap:0; }
+
+        .left-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .left-label { font-size:0.52rem; letter-spacing:0.26em; text-transform:uppercase; color:var(--text-dim); }
+        .play-btn { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.16em; padding:9px 22px; border:1px solid var(--gold-border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all 0.25s; }
+        .play-btn:hover { border-color:var(--gold); color:var(--gold); }
+        .play-btn.on { background:var(--gold); color:#060605; border-color:var(--gold); }
+
+        /* STRIP */
+        .strip {
+            display: grid;
+            grid-template-columns: 52px 160px 1fr;
+            border: 1px solid var(--gold-border);
+            background: var(--bg-card);
+            margin-bottom: 5px;
+            position: relative;
+            transition: background 0.25s, border-color 0.25s;
+            min-height: 80px;
+        }
+        .strip::before { content:''; position:absolute; left:0;top:0;bottom:0;width:3px; background:var(--gold); opacity:0; transition:opacity 0.25s; }
+        .strip.active { background:var(--bg-raised); border-color:rgba(200,168,75,0.36); }
+        .strip.active::before { opacity:1; }
+
+        /* ID cell */
+        .s-id {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            padding:14px 6px; border-right:1px solid var(--gold-border);
+            cursor:pointer; gap:7px; transition:background 0.2s;
+        }
+        .s-id:hover { background:var(--gold-pale); }
+        .s-sym { font-size:0.9rem; font-weight:700; color:var(--text-dim); transition:color 0.25s; line-height:1; }
+        .strip.active .s-sym { color:var(--gold-light); }
+        .s-led { width:7px;height:7px;border-radius:50%;background:var(--text-dim);transition:all 0.25s; }
+        .strip.active .s-led { background:var(--gold); box-shadow:0 0 7px var(--gold); }
+
+        /* Knob cell */
+        .s-knob {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            padding:12px 16px; gap:6px; border-right:1px solid var(--gold-border);
+        }
+        .knob-role { font-size:0.44rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-dim); text-align:center; line-height:1.4; }
+        .knob-wrap { width:52px;height:52px;cursor:ns-resize;touch-action:none;flex-shrink:0; }
+        .knob-svg { width:52px;height:52px;overflow:visible;display:block; }
+        .k-track { fill:none;stroke:rgba(200,168,75,0.1);stroke-width:4;stroke-linecap:round; }
+        .k-arc   { fill:none;stroke:var(--text-dim);stroke-width:4;stroke-linecap:round;transition:stroke 0.25s; }
+        .k-nub   { fill:var(--text-dim);transition:fill 0.25s; }
+        .strip.active .k-arc { stroke:var(--gold); }
+        .strip.active .k-nub { fill:var(--gold-light); }
+        .knob-val { font-size:0.54rem; color:var(--text-dim); text-align:center; min-width:60px; transition:color 0.25s; }
+        .strip.active .knob-val { color:var(--gold); }
+
+        /* Info cell */
+        .s-info { display:flex; flex-direction:column; justify-content:center; padding:12px 14px; gap:4px; min-width:0; }
+        .s-name { font-family:var(--serif); font-size:0.8rem; font-style:italic; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color 0.25s; }
+        .strip.active .s-name { color:var(--text); }
+        .s-role-desc { font-size:0.48rem; color:var(--text-dim); line-height:1.6; }
+        .strip.active .s-role-desc { color:rgba(200,168,75,0.55); }
+        .s-live { font-size:0.46rem; color:var(--text-dim); margin-top:3px; transition:color 0.25s; }
+        .strip.active .s-live { color:rgba(200,168,75,0.4); }
+
+        /* RIGHT */
+        .right { display:flex; flex-direction:column; overflow-y:auto; }
+        .rsec { padding:18px 20px; border-bottom:1px solid var(--gold-border); flex-shrink:0; }
+        .rlabel { font-size:0.48rem; letter-spacing:0.28em; text-transform:uppercase; color:var(--text-dim); margin-bottom:12px; }
+
+        .n-box { text-align:center; padding:16px; background:var(--gold-pale); border:1px solid var(--gold-border); margin-bottom:14px; }
+        .n-label { font-size:0.44rem; letter-spacing:0.14em; color:var(--text-dim); margin-bottom:7px; }
+        .n-num { font-family:var(--serif); font-size:2.8rem; font-weight:300; color:var(--gold); line-height:1; }
+        .n-unit { font-size:0.46rem; color:var(--text-dim); margin-top:6px; letter-spacing:0.1em; line-height:1.7; }
+
+        /* Beat vis */
+        #beatCanvas { width:100%; height:48px; display:block; }
+
+        /* Waveform */
+        #waveCanvas { width:100%; height:52px; display:block; }
+
+        /* Vi panel */
+        .vi-panel { flex:1; padding:18px 20px; border-bottom:1px solid var(--gold-border); overflow-y:auto; }
+        .vi { display:none; }
+        .vi.on { display:block; }
+        .vi-sym { font-size:1.3rem; font-weight:700; color:var(--gold); margin-bottom:4px; }
+        .vi-name { font-family:var(--serif); font-size:0.88rem; font-style:italic; color:var(--text); margin-bottom:8px; }
+        .vi-role { font-size:0.56rem; color:var(--gold); opacity:0.8; font-weight:700; margin-bottom:8px; letter-spacing:0.05em; }
+        .vi-body { font-size:0.54rem; color:var(--text-dim); line-height:1.85; }
+
+        /* Legend */
+        .legend { padding:14px 20px; }
+        .lrow { display:flex; gap:8px; font-size:0.5rem; color:var(--text-dim); line-height:1.6; margin-bottom:7px; }
+        .ldot { width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:4px;flex-shrink:0; }
+
+        /* bottom */
+        .bottom { padding:10px 28px; border-top:1px solid var(--gold-border); display:flex; justify-content:space-between; align-items:center; font-size:0.5rem; color:var(--text-dim); flex-shrink:0; }
+        .kb { display:flex; gap:14px; }
+        .kh { display:flex; align-items:center; gap:5px; }
+        .key { border:1px solid var(--gold-border); padding:2px 5px; font-size:0.44rem; }
+
+        @media (max-width:820px) { main { grid-template-columns:1fr; } .right { border-top:1px solid var(--gold-border); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Drake Equation <em>Looper</em></h1>
+        <p>Each variable has a distinct musical role · the equation becomes a composition</p>
+    </div>
+    <a href="golden_record.html" class="back-link">← Back to Record</a>
+</header>
+
+<main>
+    <div class="left">
+        <div class="left-header">
+            <span class="left-label">Variables // Click symbol to activate · drag knob to tune</span>
+            <button class="play-btn" id="playBtn" onclick="toggleMaster()">▶ Begin</button>
+        </div>
+        <div id="strips"></div>
+    </div>
+
+    <div class="right">
+        <div class="rsec">
+            <div class="rlabel">N — Estimated Civilizations</div>
+            <div class="n-box">
+                <div class="n-label">Communicating civilizations in the Milky Way</div>
+                <div class="n-num" id="nNum">—</div>
+                <div class="n-unit" id="nUnit">activate a variable to begin</div>
+            </div>
+            <div class="rlabel" style="margin-bottom:8px;">Beat Grid</div>
+            <canvas id="beatCanvas"></canvas>
+        </div>
+
+        <div class="rsec" style="padding:12px 20px;">
+            <div class="rlabel">Waveform</div>
+            <canvas id="waveCanvas"></canvas>
+        </div>
+
+        <div class="vi-panel">
+            <div class="rlabel">Variable Role</div>
+            <div id="viDefault" style="font-size:0.54rem;color:var(--text-dim);font-style:italic;line-height:1.9;">
+                Hover a channel to see<br>its musical role.
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="rlabel">Musical System</div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">R★</strong> sets tempo · base note 432 Hz · silence between beats</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">fₚ</strong> divides note into unison → dyad → triad → full chord</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">nₑ</strong> second pitch · speed warps its frequency like vinyl</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">fₗ</strong> envelope swell · how dramatically each note breathes</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">fᵢ</strong> modal complexity · adds pitches within the key</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">fᶜ</strong> EQ filter · shapes what frequencies of N we hear</div></div>
+            <div class="lrow"><div class="ldot"></div><div><strong style="color:var(--text)">L</strong> master volume / inertia · slow fade over deep time</div></div>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <span>N ≈ <strong id="bottomN" style="color:var(--gold)">–</strong> &nbsp;·&nbsp; <span id="activeCount">0</span>/7 active</span>
+        <div class="kb">
+            <div class="kh"><span class="key">1–7</span> toggle</div>
+            <div class="kh"><span class="key">Space</span> play/stop</div>
+            <div class="kh"><span class="key">Esc</span> silence</div>
+        </div>
+    </div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// VARIABLE DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const VARS = [
+    {
+        key:'R', sym:'R★', name:'Star formation rate', unit:'stars/yr',
+        min:0.5, max:10, step:0.1, def:3,
+        musicalRole:'Tempo · Base pitch 432 Hz',
+        roleDesc:'Sets the BPM. Higher rate = faster beat. Notes play at 432 Hz with silence between — the cosmic clock.',
+        sciDesc:'Average rate new stars form in the Milky Way each year. Current estimates: 1–3 solar masses/yr. Our Sun is one of billions formed over cosmic time.',
+    },
+    {
+        key:'fp', sym:'fₚ', name:'Fraction with planets', unit:'fraction',
+        min:0.01, max:1, step:0.01, def:0.5,
+        musicalRole:'Chord division',
+        roleDesc:'Divides the beat note into multiple simultaneous pitches. Low fp = one note alone. Higher = dyad, triad, full chord, cluster. Planets multiply voices.',
+        sciDesc:'Kepler data: planets are near-ubiquitous. The question is no longer whether planets exist around other stars, but what kinds.',
+    },
+    {
+        key:'ne', sym:'nₑ', name:'Habitable worlds per star', unit:'worlds/star',
+        min:0.01, max:5, step:0.01, def:0.4,
+        musicalRole:'Second pitch · vinyl speed warp',
+        roleDesc:'Adds a second independent pitch. As you increase ne, both its tempo and frequency rise together — like speeding up a record. Fast ne = high, urgent tone.',
+        sciDesc:'Europa\'s subsurface ocean, Titan\'s chemistry, Mars\' ancient water all expand what "habitable" means beyond the traditional zone.',
+    },
+    {
+        key:'fl', sym:'fₗ', name:'Fraction where life arises', unit:'fraction',
+        min:0.0001, max:1, step:0.001, def:0.13,
+        musicalRole:'Envelope swell · dynamic contrast',
+        roleDesc:'Controls how dramatically each note breathes. Low fl = flat, hushed. High fl = sharp attack, long swell, full dynamic range. Life makes things loud.',
+        sciDesc:'The most uncertain Drake factor. Life appeared on Earth within ~300M years of suitable conditions. Was that fast, or were we lucky? The leap to self-replication remains unknown.',
+    },
+    {
+        key:'fi', sym:'fᵢ', name:'Fraction evolving intelligence', unit:'fraction',
+        min:0.0001, max:1, step:0.001, def:0.01,
+        musicalRole:'Modal complexity · new pitches in key',
+        roleDesc:'Introduces new pitches within the key (Lydian mode). Low fi = root only. Higher = pentatonic → diatonic → chromatic additions. Intelligence diversifies the harmonic world.',
+        sciDesc:'Intelligence evolved once in 4 billion Earth years. Our ancestors nearly went extinct 900,000 years ago (Hu et al. 2023). Technical civilization emerged only once.',
+    },
+    {
+        key:'fc', sym:'fᶜ', name:'Fraction that communicate', unit:'fraction',
+        min:0.0001, max:1, step:0.001, def:0.1,
+        musicalRole:'EQ filter on the full mix',
+        roleDesc:'Shapes which frequencies of the total sound are heard. Low fc = only muffled low frequencies pass. High fc = full spectrum opens up. We only hear what reaches us.',
+        sciDesc:'We\'ve broadcast radio for ~100 years — a cosmic instant. Civilizations using methods we haven\'t imagined are invisible to us. Margot et al. (2019): narrow-band radio is our best hope.',
+    },
+    {
+        key:'L', sym:'L', name:'Civilization lifetime', unit:'years',
+        min:100, max:1000000, step:100, def:10000,
+        musicalRole:'Master volume · inertia',
+        roleDesc:'Controls overall loudness with very slow fade. Low L = quiet, fragile, fading. High L = sustained, full-bodied, lasting. N is directly proportional to L.',
+        sciDesc:'If civilizations self-destruct within centuries, the galaxy is near-empty. If they survive millions of years, it may teem with signals. L is the most consequential — and sobering — factor.',
+    }
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const state = {};
+VARS.forEach(v => { state[v.key] = { active: false, val: v.def }; });
+
+let audioCtx = null, masterGain = null, masterFilter = null, analyser = null;
+let playing = false;
+let schedulerTimer = null;
+let nextBeatTime = 0;
+let beatCount = 0;
+let animId = null;
+const LOOKAHEAD = 0.05;   // seconds ahead to schedule
+const SCHEDULE_INTERVAL = 25; // ms between scheduler calls
+
+// Beat visualizer state
+const BEAT_CELLS = 16;
+let beatGrid = new Array(BEAT_CELLS).fill(0); // 0–1 brightness
+let currentBeat = 0;
+
+// ═══════════════════════════════════════════════════════════
+// AUDIO INIT
+// ═══════════════════════════════════════════════════════════
+function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Master filter (fc controls this)
+    masterFilter = audioCtx.createBiquadFilter();
+    masterFilter.type = 'lowpass';
+    masterFilter.frequency.value = 8000;
+    masterFilter.Q.value = 1.0;
+
+    // Master gain (L controls this)
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0;
+
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
+
+    masterFilter.connect(masterGain);
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MUSICAL SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// R★ → BPM
+function getBPM() {
+    const v = VARS.find(x=>x.key==='R');
+    const t = (state.R.val - v.min) / (v.max - v.min);
+    return 30 + t * 110; // 30–140 BPM
+}
+function getBeatDur() { return 60 / getBPM(); }
+
+// fp → chord notes (semitone offsets from root)
+// Chord builds: unison → octave → fifth+octave → maj triad → maj7 → 9th chord → cluster
+const CHORD_SETS = [
+    [0],                        // 1 note
+    [0, 12],                    // octave
+    [0, 7, 12],                 // open fifth + octave
+    [0, 4, 7, 12],              // major triad + octave
+    [0, 4, 7, 11, 12],          // maj7
+    [0, 4, 7, 11, 14, 12],      // 9th
+    [0, 4, 7, 11, 14, 17, 12],  // 11th (full)
+];
+function getChordOffsets() {
+    const v = VARS.find(x=>x.key==='fp');
+    const t = (state.fp.val - v.min) / (v.max - v.min);
+    const idx = Math.min(CHORD_SETS.length - 1, Math.floor(t * CHORD_SETS.length));
+    return CHORD_SETS[idx];
+}
+
+// ne → second pitch, frequency warped by its own "speed"
+// Treated like a separate record playing alongside at a rate proportional to ne
+function getNeFreq() {
+    const v = VARS.find(x=>x.key==='ne');
+    const t = (state.ne.val - v.min) / (v.max - v.min);
+    // At low ne: slow, low pitch (like a sluggish record) — fifth below 432
+    // At high ne: fast, high pitch (sped-up record) — up to an octave+ above
+    const baseFreq = 432 * Math.pow(2, -7/12); // perfect fifth below
+    const speedFactor = 0.5 + t * 1.8; // 0.5× to 2.3× speed = pitch ratio
+    return baseFreq * speedFactor;
+}
+function getNeBeatDur() {
+    const v = VARS.find(x=>x.key==='ne');
+    const t = (state.ne.val - v.min) / (v.max - v.min);
+    // Faster ne = shorter beat interval (its own tempo)
+    const speedFactor = 0.5 + t * 1.8;
+    return getBeatDur() / speedFactor;
+}
+
+// fl → envelope shape (attack time, release time, peak gain)
+function getEnvelope(beatDur) {
+    const v = VARS.find(x=>x.key==='fl');
+    const t = (state.fl.val - v.min) / (v.max - v.min);
+    // Low fl: barely a whisper, no swell
+    // High fl: sharp attack, long swell filling nearly the full beat
+    const noteLen = beatDur * (0.15 + t * 0.75); // note occupies 15%–90% of beat
+    const attack  = noteLen * (0.05 + (1 - t) * 0.4); // high fl = sharper attack
+    const release = noteLen * (0.3 + t * 0.5);
+    const peak    = 0.05 + t * 0.55; // quiet whisper to full voice
+    return { attack, release, noteLen, peak };
+}
+
+// fi → scale pitches within key (Lydian for cosmic brightness)
+// Builds from just root up to full chromatic additions
+const LYDIAN_SCALE = [0, 2, 4, 6, 7, 9, 11]; // Lydian mode semitones
+const EXTRA_CHROMATIC = [1, 3, 5, 8, 10];     // additional chromatic tones
+function getScalePitches() {
+    const v = VARS.find(x=>x.key==='fi');
+    const t = (state.fi.val - v.min) / (v.max - v.min);
+    // 0–0.2: root only; 0.2–0.5: pentatonic subset; 0.5–0.8: full Lydian; 0.8–1: + chromatic
+    let pitches;
+    if (t < 0.15) {
+        pitches = [0];
+    } else if (t < 0.35) {
+        pitches = [0, 4, 7];            // pentatonic subset
+    } else if (t < 0.6) {
+        pitches = LYDIAN_SCALE.slice(0, 5);
+    } else if (t < 0.85) {
+        pitches = LYDIAN_SCALE;
+    } else {
+        const chromCount = Math.round((t - 0.85) / 0.15 * EXTRA_CHROMATIC.length);
+        pitches = [...LYDIAN_SCALE, ...EXTRA_CHROMATIC.slice(0, chromCount)];
+    }
+    return pitches;
+}
+// Pick a random pitch from the available scale (or cycle through them)
+let scaleIndex = 0;
+function nextScalePitch() {
+    const pitches = getScalePitches();
+    const p = pitches[scaleIndex % pitches.length];
+    scaleIndex++;
+    return p;
+}
+
+// fc → master filter cutoff
+function getFilterHz() {
+    const v = VARS.find(x=>x.key==='fc');
+    const t = (state.fc.val - v.min) / (v.max - v.min);
+    // Low fc: very muffled (200 Hz), high fc: full open (12 kHz)
+    return 200 + Math.pow(t, 1.5) * 11800;
+}
+
+// L → master gain (with slow inertia)
+function getTargetGain() {
+    if (!state.L.active) return 0;
+    const v = VARS.find(x=>x.key==='L');
+    const t = (Math.log(state.L.val) - Math.log(v.min)) / (Math.log(v.max) - Math.log(v.min));
+    return 0.08 + t * 0.62;
+}
+function getLInertia() {
+    // Time constant for gain changes — longer L = slower fade in/out
+    const v = VARS.find(x=>x.key==='L');
+    const t = (Math.log(state.L.val) - Math.log(v.min)) / (Math.log(v.max) - Math.log(v.min));
+    return 0.3 + t * 4.0; // 0.3s to 4.3s
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCHEDULER — Web Audio lookahead pattern
+// ═══════════════════════════════════════════════════════════
+
+// Track ne's independent beat time
+let nextNeBeatTime = 0;
+let neBeatCount = 0;
+
+function scheduleNote(freq, semitoneOffset, time, beatDur, envOverride) {
+    const hz = freq * Math.pow(2, semitoneOffset / 12);
+    const env = envOverride || getEnvelope(beatDur);
+
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = hz;
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(env.peak, time + env.attack);
+    gain.gain.setValueAtTime(env.peak, time + env.attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + env.noteLen);
+
+    osc.connect(gain);
+    gain.connect(masterFilter);
+    osc.start(time);
+    osc.stop(time + env.noteLen + 0.05);
+}
+
+function scheduleBeat(time) {
+    if (!playing) return;
+    const beatDur = getBeatDur();
+
+    // ── R★: chord beat at 432 Hz ──
+    if (state.R.active) {
+        const chordOffsets = getChordOffsets();
+        const scalePitch = state.fi.active ? nextScalePitch() : 0;
+        const baseFreq = 432 * Math.pow(2, scalePitch / 12);
+        chordOffsets.forEach(offset => {
+            scheduleNote(baseFreq, offset, time, beatDur);
+        });
+
+        // Update beat grid visualizer
+        const cell = beatCount % BEAT_CELLS;
+        setTimeout(() => {
+            beatGrid[cell] = 1.0;
+            currentBeat = cell;
+        }, (time - audioCtx.currentTime) * 1000);
+        beatCount++;
+    }
+}
+
+function scheduleNeBeat(time) {
+    if (!playing || !state.ne.active) return;
+    const neDur = getNeBeatDur();
+    const neFreq = getNeFreq();
+    const env = getEnvelope(neDur);
+    // ne has slightly softer peak
+    const neEnv = { ...env, peak: env.peak * 0.65 };
+    scheduleNote(neFreq, 0, time, neDur, neEnv);
+
+    const cell = neBeatCount % BEAT_CELLS;
+    setTimeout(() => { beatGrid[cell] = Math.max(beatGrid[cell], 0.5); },
+        (time - audioCtx.currentTime) * 1000);
+    neBeatCount++;
+}
+
+function scheduler() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const beatDur = getBeatDur();
+
+    // Main beat (R★ driven)
+    while (nextBeatTime < now + LOOKAHEAD) {
+        scheduleBeat(nextBeatTime);
+        nextBeatTime += beatDur;
+    }
+
+    // ne independent beat
+    if (state.ne.active) {
+        const neDur = getNeBeatDur();
+        while (nextNeBeatTime < now + LOOKAHEAD) {
+            scheduleNeBeat(nextNeBeatTime);
+            nextNeBeatTime += neDur;
+        }
+    }
+
+    // Live: update filter and master gain
+    if (masterFilter) {
+        const fc = state.fc.active ? getFilterHz() : 12000;
+        masterFilter.frequency.setTargetAtTime(fc, now, 0.1);
+    }
+    if (masterGain) {
+        const g = state.L.active ? getTargetGain() : 0.5;
+        const tau = getLInertia();
+        masterGain.gain.setTargetAtTime(g, now, tau);
+    }
+}
+
+function startScheduler() {
+    const now = audioCtx.currentTime;
+    nextBeatTime = now + 0.1;
+    nextNeBeatTime = now + 0.1;
+    beatCount = 0; neBeatCount = 0; scaleIndex = 0;
+    schedulerTimer = setInterval(scheduler, SCHEDULE_INTERVAL);
+}
+
+function stopScheduler() {
+    if (schedulerTimer) { clearInterval(schedulerTimer); schedulerTimer = null; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOGGLE / MASTER
+// ═══════════════════════════════════════════════════════════
+function toggleVoice(varKey) {
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    state[varKey].active = !state[varKey].active;
+    document.getElementById('strip-'+varKey).classList.toggle('active', state[varKey].active);
+
+    // If L just activated and we're playing, set gain
+    if (varKey === 'L' && playing && masterGain) {
+        masterGain.gain.setTargetAtTime(getTargetGain(), audioCtx.currentTime, getLInertia());
+    }
+    // If L deactivated, keep some base gain so we can still hear other stuff
+    if (varKey === 'L' && !state.L.active && masterGain) {
+        masterGain.gain.setTargetAtTime(0.4, audioCtx.currentTime, 0.5);
+    }
+
+    updateN();
+    updateLiveDisplays();
+    document.getElementById('activeCount').textContent = VARS.filter(v=>state[v.key].active).length;
+}
+
+function toggleMaster() {
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    playing = !playing;
+    const btn = document.getElementById('playBtn');
+    if (playing) {
+        btn.textContent = '■ Stop'; btn.classList.add('on');
+        // Set initial gain
+        masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        masterGain.gain.setTargetAtTime(
+            state.L.active ? getTargetGain() : 0.4,
+            audioCtx.currentTime, 0.5
+        );
+        startScheduler();
+        drawWave(); drawBeats();
+    } else {
+        btn.textContent = '▶ Begin'; btn.classList.remove('on');
+        stopScheduler();
+        masterGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
+        if (animId) { cancelAnimationFrame(animId); animId = null; }
+        clearCanvas('waveCanvas');
+        clearCanvas('beatCanvas');
+    }
+}
+
+function silenceAll() {
+    playing = false;
+    stopScheduler();
+    document.getElementById('playBtn').textContent = '▶ Begin';
+    document.getElementById('playBtn').classList.remove('on');
+    VARS.forEach(v => {
+        state[v.key].active = false;
+        const s = document.getElementById('strip-'+v.key);
+        if (s) s.classList.remove('active');
+    });
+    if (masterGain) masterGain.gain.setTargetAtTime(0, audioCtx ? audioCtx.currentTime : 0, 0.3);
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    clearCanvas('waveCanvas'); clearCanvas('beatCanvas');
+    updateN();
+    document.getElementById('activeCount').textContent = 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+// N CALCULATION
+// ═══════════════════════════════════════════════════════════
+function updateN() {
+    const active = VARS.filter(v=>state[v.key].active);
+    if (!active.length) {
+        document.getElementById('nNum').textContent='—';
+        document.getElementById('nUnit').textContent='activate a variable to begin';
+        document.getElementById('bottomN').textContent='–';
+        return;
+    }
+    const N = active.reduce((acc,v)=>acc*state[v.key].val, 1);
+    let d = N>=1e9 ? (N/1e9).toFixed(2)+'B'
+          : N>=1e6 ? (N/1e6).toFixed(2)+'M'
+          : N>=1e3 ? (N/1e3).toFixed(2)+'k'
+          : N<0.001 ? N.toExponential(2)
+          : N.toPrecision(3);
+    document.getElementById('nNum').textContent = d;
+    document.getElementById('bottomN').textContent = d;
+    document.getElementById('nUnit').textContent = active.length===7
+        ? 'full estimate · all 7 variables active'
+        : `partial · ${active.length}/7 variables active`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIVE DISPLAY UPDATES
+// ═══════════════════════════════════════════════════════════
+function updateLiveDisplays() {
+    const bpm = getBPM();
+    setLive('R', `${bpm.toFixed(0)} BPM · 432 Hz`);
+
+    const chord = getChordOffsets();
+    setLive('fp', `${chord.length} voice${chord.length>1?'s':''} · [${chord.join(',')}] semitones`);
+
+    const neF = getNeFreq().toFixed(1);
+    const neSpd = ((0.5 + ((state.ne.val - 0.01)/(5-0.01))*1.8)).toFixed(2);
+    setLive('ne', `${neF} Hz · ${neSpd}× speed`);
+
+    const env = getEnvelope(getBeatDur());
+    setLive('fl', `attack ${(env.attack*1000).toFixed(0)}ms · peak ${(env.peak*100).toFixed(0)}%`);
+
+    const pitches = getScalePitches();
+    setLive('fi', `${pitches.length} pitch${pitches.length>1?'es':''} in key · [${pitches.join(',')}]`);
+
+    const fHz = getFilterHz();
+    setLive('fc', `filter cutoff ${fHz>=1000?(fHz/1000).toFixed(1)+'kHz':fHz.toFixed(0)+'Hz'}`);
+
+    const g = (getTargetGain()*100).toFixed(0);
+    const tau = getLInertia().toFixed(1);
+    setLive('L', `${g}% volume · ${tau}s fade`);
+}
+
+function setLive(varKey, text) {
+    const el = document.getElementById('live-'+varKey);
+    if (el) el.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════
+// KNOB SYSTEM
+// ═══════════════════════════════════════════════════════════
+const KCX=26, KCY=26, KR=18;
+const KS=Math.PI*0.75, KE=Math.PI*2.25, KRN=KE-KS;
+function kAngle(n){return KS+n*KRN;}
+function kXY(a){return{x:KCX+KR*Math.cos(a),y:KCY+KR*Math.sin(a)};}
+function kArcPath(n){
+    const s=kXY(KS),e=kXY(kAngle(n));
+    const lg=(n*KRN)>Math.PI?1:0;
+    return `M${s.x} ${s.y} A${KR} ${KR} 0 ${lg} 1 ${e.x} ${e.y}`;
+}
+function knobSVG(id,n){
+    const pos=kXY(kAngle(n));
+    return `<svg class="knob-svg" viewBox="0 0 52 52">
+      <circle cx="${KCX}" cy="${KCY}" r="${KR}" class="k-track"/>
+      <path id="arc-${id}" class="k-arc" d="${kArcPath(n)}"/>
+      <circle id="nub-${id}" class="k-nub" r="3" cx="${pos.x}" cy="${pos.y}"/>
+    </svg>`;
+}
+function refreshKnobSVG(id,n){
+    const nc=Math.max(0.001,Math.min(1,n));
+    const arc=document.getElementById('arc-'+id);
+    const nub=document.getElementById('nub-'+id);
+    if(arc) arc.setAttribute('d',kArcPath(nc));
+    if(nub){const p=kXY(kAngle(nc));nub.setAttribute('cx',p.x);nub.setAttribute('cy',p.y);}
+}
+
+function valToNorm(varKey, val) {
+    const v = VARS.find(x=>x.key===varKey);
+    if (varKey==='L') return (Math.log(val)-Math.log(v.min))/(Math.log(v.max)-Math.log(v.min));
+    return (val-v.min)/(v.max-v.min);
+}
+function normToVal(varKey, n) {
+    const v = VARS.find(x=>x.key===varKey);
+    let val;
+    if (varKey==='L') val=Math.exp(Math.log(v.min)+n*(Math.log(v.max)-Math.log(v.min)));
+    else val=v.min+n*(v.max-v.min);
+    val=Math.round(val/v.step)*v.step;
+    return Math.max(v.min,Math.min(v.max,val));
+}
+function fmtVal(varKey) {
+    const v=VARS.find(x=>x.key===varKey);
+    const val=state[varKey].val;
+    if(v.unit==='fraction') return val<0.01?val.toFixed(4):val.toFixed(2);
+    if(val>=1000) return (val/1000).toFixed(1)+'k';
+    return val.toFixed(1);
+}
+
+let drag=null;
+function knobDown(e,varKey){
+    e.preventDefault();
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    drag={varKey,startY:cy,startNorm:valToNorm(varKey,state[varKey].val)};
+}
+window.addEventListener('mousemove',e=>{
+    if(!drag) return;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    const delta=(drag.startY-cy)/140;
+    const newNorm=Math.max(0,Math.min(1,drag.startNorm+delta));
+    const newVal=normToVal(drag.varKey,newNorm);
+    state[drag.varKey].val=newVal;
+    refreshKnobSVG(drag.varKey,newNorm);
+    document.getElementById('kval-'+drag.varKey).textContent=fmtVal(drag.varKey)+' '+VARS.find(x=>x.key===drag.varKey).unit;
+    updateN(); updateLiveDisplays();
+});
+window.addEventListener('touchmove',e=>{
+    if(!drag) return; e.preventDefault();
+    const cy=e.touches[0].clientY;
+    const delta=(drag.startY-cy)/140;
+    const newNorm=Math.max(0,Math.min(1,drag.startNorm+delta));
+    const newVal=normToVal(drag.varKey,newNorm);
+    state[drag.varKey].val=newVal;
+    refreshKnobSVG(drag.varKey,newNorm);
+    document.getElementById('kval-'+drag.varKey).textContent=fmtVal(drag.varKey)+' '+VARS.find(x=>x.key===drag.varKey).unit;
+    updateN(); updateLiveDisplays();
+},{passive:false});
+window.addEventListener('mouseup',()=>drag=null);
+window.addEventListener('touchend',()=>drag=null);
+
+// ═══════════════════════════════════════════════════════════
+// VAR INFO HOVER
+// ═══════════════════════════════════════════════════════════
+function showInfo(varKey){
+    document.getElementById('viDefault').style.display='none';
+    VARS.forEach(v=>{const el=document.getElementById('vi-'+v.key);if(el)el.classList.toggle('on',v.key===varKey);});
+}
+
+// ═══════════════════════════════════════════════════════════
+// CANVASES
+// ═══════════════════════════════════════════════════════════
+function clearCanvas(id){
+    const canvas=document.getElementById(id);
+    if(!canvas) return;
+    const c=canvas.getContext('2d');
+    c.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function drawBeats(){
+    const canvas=document.getElementById('beatCanvas');
+    const c=canvas.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr;
+    c.scale(dpr,dpr);
+    function frame(){
+        if(!playing){return;}
+        requestAnimationFrame(frame);
+        const W=canvas.offsetWidth,H=canvas.offsetHeight;
+        c.clearRect(0,0,W,H);
+        const cellW=(W-1)/BEAT_CELLS;
+        for(let i=0;i<BEAT_CELLS;i++){
+            const x=i*cellW+0.5;
+            const bright=beatGrid[i];
+            c.fillStyle=`rgba(200,168,75,${0.06+bright*0.55})`;
+            c.fillRect(x,2,cellW-2,H-4);
+            // Decay
+            beatGrid[i]=Math.max(0,beatGrid[i]-0.04);
+        }
+        // Current beat marker
+        const cx=currentBeat*cellW+cellW/2;
+        c.strokeStyle=`rgba(200,168,75,0.3)`;
+        c.lineWidth=1;
+        c.beginPath(); c.moveTo(cx,0); c.lineTo(cx,H); c.stroke();
+    }
+    frame();
+}
+
+function drawWave(){
+    const canvas=document.getElementById('waveCanvas');
+    const c=canvas.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr;
+    c.scale(dpr,dpr);
+    function frame(){
+        if(!playing){return;}
+        animId=requestAnimationFrame(frame);
+        const W=canvas.offsetWidth,H=canvas.offsetHeight;
+        c.clearRect(0,0,W,H);
+        if(!analyser) return;
+        const buf=new Uint8Array(analyser.fftSize);
+        analyser.getByteTimeDomainData(buf);
+        c.strokeStyle='rgba(200,168,75,0.07)'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(0,H/2); c.lineTo(W,H/2); c.stroke();
+        c.strokeStyle='rgba(200,168,75,0.7)'; c.lineWidth=1.5;
+        c.beginPath();
+        for(let i=0;i<buf.length;i++){
+            const x=(i/buf.length)*W;
+            const y=((buf[i]/128)-1)*(H/2)+H/2;
+            i===0?c.moveTo(x,y):c.lineTo(x,y);
+        }
+        c.stroke();
+    }
+    frame();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUILD UI
+// ═══════════════════════════════════════════════════════════
+function buildUI(){
+    const container=document.getElementById('strips');
+    const viPanel=document.querySelector('.vi-panel');
+    container.innerHTML='';
+
+    VARS.forEach((v,i)=>{
+        const n0=valToNorm(v.key,v.def);
+        const strip=document.createElement('div');
+        strip.className='strip'; strip.id='strip-'+v.key;
+        strip.innerHTML=`
+            <div class="s-id" onclick="toggleVoice('${v.key}')" onmouseenter="showInfo('${v.key}')" title="Press ${i+1}">
+                <div class="s-sym">${v.sym}</div>
+                <div class="s-led"></div>
+            </div>
+            <div class="s-knob" onmouseenter="showInfo('${v.key}')">
+                <div class="knob-role">${v.musicalRole}</div>
+                <div class="knob-wrap"
+                    onmousedown="knobDown(event,'${v.key}')"
+                    ontouchstart="knobDown(event,'${v.key}')">
+                    ${knobSVG(v.key,n0)}
+                </div>
+                <div class="knob-val" id="kval-${v.key}">${fmtVal(v.key)} ${v.unit}</div>
+            </div>
+            <div class="s-info" onmouseenter="showInfo('${v.key}')">
+                <div class="s-name">${v.name}</div>
+                <div class="s-role-desc">${v.roleDesc}</div>
+                <div class="s-live" id="live-${v.key}">—</div>
+            </div>
+        `;
+        container.appendChild(strip);
+
+        const viEl=document.createElement('div');
+        viEl.className='vi'; viEl.id='vi-'+v.key;
+        viEl.innerHTML=`
+            <div class="vi-sym">${v.sym}</div>
+            <div class="vi-name">${v.name}</div>
+            <div class="vi-role">${v.musicalRole}</div>
+            <div class="vi-body">${v.roleDesc}<br><br>${v.sciDesc}</div>
+        `;
+        viPanel.appendChild(viEl);
+    });
+
+    updateLiveDisplays();
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT') return;
+    const i=parseInt(e.key)-1;
+    if(!isNaN(i)&&i>=0&&i<VARS.length) toggleVoice(VARS[i].key);
+    if(e.key===' '){e.preventDefault();toggleMaster();}
+    if(e.key==='Escape') silenceAll();
+});
+
+// ── INIT ──
+buildUI();
+clearCanvas('waveCanvas');
+clearCanvas('beatCanvas');
+</script>
+</body>
+</html>
