@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A New Voyager Golden Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #060605;
+  --deep: #0D0C0A;
+  --panel: rgba(13,12,10,0.95);
+  --border: rgba(200,168,75,0.20);
+  --gold: #C8A84B;
+  --gold-dim: rgba(200,168,75,0.35);
+  --silver: #FFFFFF;
+  --ice: #FFFFFF;
+  --text: #FFFFFF;
+  --muted: rgba(255,255,255,0.55);
+  --green: rgba(200,168,75,0.85);
+  --rose: rgba(200,168,75,0.65);
+  --mono: 'Josefin Sans', 'Futura', 'Century Gothic', sans-serif;
+  --serif: 'EB Garamond', Georgia, serif;
+  --display: 'Josefin Sans', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--text);font-family:var(--serif);font-size:18px;line-height:1.8;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* ── CANVAS ── */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── SIDE NAV ── */
+/* ── GLOBAL TOP NAV ── */
+#topnav{
+  position:fixed;top:0;left:0;right:0;height:40px;z-index:500;
+  background:rgba(6,6,5,0.97);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px 0 16px;
+  gap:16px;
+}
+.tn-logo{
+  font-family:var(--mono);font-size:0.58rem;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--gold);text-decoration:none;
+  display:flex;align-items:center;gap:8px;white-space:nowrap;
+  transition:opacity 0.2s;
+}
+.tn-logo:hover{opacity:0.75}
+.tn-logo-mark{font-size:1rem;line-height:1}
+.tn-links{display:flex;align-items:center;gap:4px;}
+.tn-link{
+  font-family:var(--mono);font-size:0.52rem;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--muted);text-decoration:none;
+  padding:5px 12px;border:1px solid transparent;
+  transition:all 0.2s;white-space:nowrap;
+}
+.tn-link:hover{color:var(--gold);border-color:var(--border)}
+.tn-link.active{color:var(--gold);border-color:var(--border);background:rgba(200,168,75,0.05)}
+.tn-sep{color:var(--border);font-size:0.6rem;padding:0 2px}
+
+#sidenav{
+  position:fixed;left:0;top:40px;bottom:0;width:220px;z-index:200;
+  background:rgba(6,6,5,0.97);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:0;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+#sidenav::-webkit-scrollbar{display:none}
+.nav-logo{
+  padding:1.5rem 1.4rem 1rem;
+  border-bottom:1px solid var(--border);
+  font-family:'Josefin Sans',sans-serif;
+  font-size:0.75rem;
+  color:var(--gold);
+  letter-spacing:0.08em;
+  line-height:1.4;
+}
+.nav-logo span{display:block;font-size:0.55rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.2em;text-transform:uppercase;margin-top:0.3rem}
+.nav-section{padding:0.6rem 0 0.2rem 1rem;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);opacity:0.6;margin-top:0.4rem}
+.nav-item{
+  display:flex;align-items:center;gap:0.6rem;
+  padding:0.45rem 1rem 0.45rem 1.2rem;
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--muted);letter-spacing:0.06em;
+  cursor:pointer;transition:all 0.2s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover,.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,70,0.05)}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* ── MAIN ── */
+#main{margin-left:220px;position:relative;z-index:1}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;animation:fadeIn 0.4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO AREAS ── */
+.page-hero{
+  min-height:38vh;display:flex;flex-direction:column;
+  justify-content:flex-end;padding:3rem 4rem 2.5rem;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 80%, rgba(200,168,70,0.06) 0%, transparent 60%);
+}
+.page-eyebrow{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.8rem;
+}
+.page-title{
+  font-family:'Josefin Sans',sans-serif;
+  font-size:clamp(1.4rem,3.5vw,2.6rem);
+  font-weight:700;color:var(--ice);
+  line-height:1.15;letter-spacing:0.02em;
+  max-width:700px;
+}
+.page-desc{
+  margin-top:1rem;font-size:1.1rem;font-style:italic;
+  color:var(--muted);max-width:600px;line-height:1.6;
+}
+
+/* ── CONTENT ── */
+.content{padding:3rem 4rem;max-width:1000px}
+.content h2{
+  font-family:var(--display);font-size:1.3rem;font-weight:600;
+  color:var(--gold);letter-spacing:0.06em;
+  margin:2.5rem 0 0.8rem;padding-bottom:0.4rem;
+  border-bottom:1px solid var(--border);
+}
+.content h3{
+  font-family:var(--display);font-size:1rem;font-weight:400;
+  color:var(--silver);letter-spacing:0.08em;margin:1.8rem 0 0.5rem;
+}
+.content p{margin-bottom:1.2rem;color:var(--text);font-size:1.02rem}
+.content em{color:var(--gold);font-style:italic}
+.content strong{color:var(--ice);font-weight:600}
+
+/* ── SUBPAGE TABS ── */
+.subtabs{
+  display:flex;flex-wrap:wrap;gap:0.5rem;
+  padding:1.5rem 4rem 0;border-bottom:1px solid var(--border);
+}
+.subtab{
+  padding:0.5rem 1.2rem;font-family:var(--mono);font-size:0.65rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--muted);border:1px solid transparent;
+  border-radius:2px;cursor:pointer;transition:all 0.2s;
+}
+.subtab:hover{color:var(--silver);border-color:var(--border)}
+.subtab.active{color:var(--gold);border-color:var(--gold-dim);background:rgba(200,168,70,0.06)}
+.subpage{display:none}.subpage.active{display:block}
+
+/* ── WIDGETS ── */
+.widget{
+  background:rgba(13,12,10,0.8);border:1px solid var(--border);
+  border-radius:3px;padding:2rem;margin:2rem 0;
+  position:relative;overflow:hidden;
+}
+.widget::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+}
+.widget-title{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;opacity:0.8;
+}
+
+/* converter */
+.converter-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+.conv-field label{
+  display:block;font-family:var(--mono);font-size:0.6rem;
+  letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;
+}
+.conv-field input{
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:2px;
+  padding:0.6rem 0.8rem;color:var(--ice);
+  font-family:var(--mono);font-size:0.9rem;
+  outline:none;transition:border-color 0.2s;
+}
+.conv-field input:focus{border-color:var(--gold-dim)}
+
+/* prime list */
+.prime-grid{
+  display:grid;grid-template-columns:repeat(10,1fr);
+  gap:3px;font-family:var(--mono);font-size:0.68rem;
+  color:var(--muted);max-height:300px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.prime-grid span{
+  padding:3px 2px;text-align:center;
+  transition:color 0.15s,background 0.15s;border-radius:2px;
+}
+.prime-grid span:hover{color:var(--gold);background:rgba(200,168,70,0.1)}
+
+/* constants table */
+.const-table{width:100%;border-collapse:collapse;font-size:0.88rem}
+.const-table th{
+  font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--gold);
+  padding:0.5rem 0.6rem;border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.const-table td{
+  padding:0.6rem;border-bottom:1px solid rgba(255,255,255,0.03);
+  vertical-align:top;
+}
+.const-table tr:hover td{background:rgba(200,168,70,0.03)}
+.sym{color:var(--rose);font-family:var(--mono)}
+.val{color:var(--green);font-family:var(--mono);font-size:0.82rem}
+.desc{color:var(--muted);font-size:0.85rem;font-style:italic}
+
+/* equations */
+.eq-block{
+  background:rgba(6,6,5,0.9);border-left:3px solid var(--gold);
+  border-radius:2px;padding:1.5rem 2rem;margin:1.5rem 0;
+}
+.eq-label{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.6;margin-bottom:0.8rem}
+.eq{font-family:var(--mono);font-size:1rem;color:#e8d8a0;line-height:1.8}
+.eq-note{margin-top:0.8rem;font-size:0.84rem;color:var(--muted);font-style:italic;line-height:1.5}
+
+/* pie */
+.comp-row{display:flex;align-items:center;gap:3rem;flex-wrap:wrap;margin:2rem 0}
+.comp-bars{flex:1;min-width:220px}
+.comp-bar-item{margin-bottom:1.2rem}
+.comp-bar-label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);font-size:0.7rem;margin-bottom:0.4rem;
+}
+.comp-bar-track{height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+.comp-bar-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+
+/* timeline */
+.tl{position:relative;padding:1rem 0 1rem 2rem;margin:1.5rem 0}
+.tl::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--gold),rgba(200,168,70,0.1))}
+.tl-item{position:relative;margin-bottom:1.8rem}
+.tl-dot{
+  position:absolute;left:-2rem;top:4px;
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid var(--void);background:var(--gold);
+  box-shadow:0 0 6px rgba(200,168,70,0.6);
+}
+.tl-time{font-family:var(--mono);font-size:0.65rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:0.2rem}
+.tl-name{font-family:var(--display);font-size:0.95rem;color:var(--ice);margin-bottom:0.3rem}
+.tl-desc{font-size:0.9rem;color:var(--muted);line-height:1.55}
+
+/* cards grid */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;margin:1.5rem 0}
+.card{
+  background:rgba(13,12,10,0.7);border:1px solid var(--border);
+  border-radius:3px;padding:1.5rem;transition:border-color 0.25s,transform 0.25s;
+}
+.card:hover{border-color:rgba(200,168,70,0.4);transform:translateY(-2px)}
+.card-icon{font-size:1.8rem;margin-bottom:0.8rem}
+.card-title{font-family:var(--display);font-size:0.85rem;color:var(--silver);letter-spacing:0.06em;margin-bottom:0.5rem}
+.card p{font-size:0.88rem;color:var(--muted);margin:0;line-height:1.6}
+
+/* HR diagram SVG */
+.svg-diagram{width:100%;max-width:640px;display:block;margin:1.5rem 0}
+
+/* embed links */
+.ext-link{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.6rem 1.2rem;border:1px solid var(--border);border-radius:2px;
+  font-family:var(--mono);font-size:0.68rem;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--silver);
+  transition:all 0.2s;margin:0.4rem 0.4rem 0.4rem 0;
+}
+.ext-link:hover{color:var(--gold);border-color:var(--gold-dim);background:rgba(200,168,70,0.04)}
+.ext-link::before{content:'↗';color:var(--gold)}
+
+/* iframe embed */
+.embed-frame{
+  width:100%;border:1px solid var(--border);border-radius:3px;
+  margin:1.2rem 0;background:rgba(0,0,0,0.4);
+}
+
+/* planet types */
+.planet-row{display:flex;flex-wrap:wrap;gap:1.5rem;margin:1.5rem 0;align-items:flex-end}
+.planet-item{text-align:center}
+.planet-circle{border-radius:50%;margin:0 auto 0.5rem;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,0.25),transparent 60%)}
+.planet-name{font-family:var(--mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.1em}
+
+/* standard model grid */
+.sm-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:1.5rem 0;font-family:var(--mono)}
+.sm-cell{
+  aspect-ratio:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;border-radius:3px;padding:4px;
+  font-size:clamp(0.5rem,0.9vw,0.72rem);text-align:center;
+  border:1px solid rgba(255,255,255,0.08);transition:transform 0.15s;
+}
+.sm-cell:hover{transform:scale(1.1);z-index:10}
+.sm-cell .particle{font-size:clamp(0.65rem,1.1vw,0.9rem);font-weight:500;color:var(--ice)}
+.sm-cell .pname{font-size:0.5rem;color:var(--muted);margin-top:1px}
+.sm-quark{background:rgba(126,203,160,0.12);border-color:rgba(126,203,160,0.25)}
+.sm-lepton{background:rgba(224,160,184,0.12);border-color:rgba(224,160,184,0.25)}
+.sm-boson{background:rgba(200,168,70,0.12);border-color:rgba(200,168,70,0.25)}
+.sm-higgs{background:rgba(200,168,75,0.10);border-color:rgba(200,168,75,0.25)}
+.sm-empty{border-color:transparent;background:transparent}
+
+/* periodic table */
+.pt{display:grid;grid-template-columns:repeat(18,1fr);gap:2px;margin:1.5rem 0;font-family:var(--mono)}
+.el{
+  aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:2px;border:1px solid rgba(255,255,255,0.07);
+  font-size:clamp(0.4rem,0.65vw,0.6rem);cursor:default;
+  transition:transform 0.15s,border-color 0.15s;
+  padding:1px;
+}
+.el:hover{transform:scale(1.2);z-index:10;border-color:var(--gold)}
+.el .sym2{font-size:clamp(0.5rem,0.85vw,0.75rem);font-weight:500;color:var(--ice)}
+.el .num{color:var(--muted);font-size:0.45rem}
+.el-gap{border:none;background:transparent}
+.nonmetal{background:rgba(126,203,160,0.1)}
+.noble{background:rgba(255,255,255,0.05)}
+.metal{background:rgba(200,168,70,0.1)}
+.metalloid{background:rgba(224,160,184,0.08)}
+.transition{background:rgba(100,140,200,0.1)}
+.lanthanide{background:rgba(180,130,200,0.1)}
+.actinide{background:rgba(200,120,100,0.1)}
+
+/* galaxy morphologies */
+.galaxy-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin:1.5rem 0}
+.galaxy-item{text-align:center}
+.galaxy-name{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-top:0.5rem;letter-spacing:0.1em}
+
+/* biosig table */
+.biosig{width:100%;border-collapse:collapse;font-size:0.88rem}
+.biosig th{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);padding:0.5rem 0.8rem;border-bottom:1px solid var(--border);text-align:left}
+.biosig td{padding:0.65rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:top}
+.biosig tr:hover td{background:rgba(200,168,70,0.03)}
+
+/* quote */
+.pullquote{
+  border-left:3px solid var(--gold);padding:1.2rem 1.8rem;
+  background:rgba(200,168,70,0.04);margin:2rem 0;
+  font-style:italic;color:var(--silver);font-size:1.05rem;line-height:1.65;
+}
+
+/* responsive */
+@media(max-width:800px){
+  #sidenav{width:180px}
+  #main{margin-left:180px}
+  .content,.subtabs{padding-left:1.5rem;padding-right:1.5rem}
+  .page-hero{padding:2rem 1.5rem 2rem}
+  .converter-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  #sidenav{display:none}
+  #main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- ════ SIDE NAV ════ -->
+<!-- ════ GLOBAL TOP NAV ════ -->
+<div id="topnav">
+  <a href="index.html" class="tn-logo">
+    <span class="tn-logo-mark">✦</span>
+    The New Golden Record
+  </a>
+  <div class="tn-links">
+    <a href="index.html" class="tn-link">← Home</a>
+    <span class="tn-sep">|</span>
+    <a href="golden-recordv2.html" class="tn-link active">The Record</a>
+    <span class="tn-sep">|</span>
+    <a href="v6looper.html" class="tn-link">Drake Looper ↗</a>
+  </div>
+</div>
+
+<nav id="sidenav">
+  <div class="nav-logo">
+    Voyager<br>Golden Record
+    <span>21st Century Proxy</span>
+  </div>
+
+  <div class="nav-section">I. Numbers</div>
+  <div class="nav-item" onclick="showPage('numbers')"><span class="nav-dot"></span>Numbers & Conversions</div>
+
+  <div class="nav-section">II. Universal Physics</div>
+  <div class="nav-item" onclick="showPage('physics')"><span class="nav-dot"></span>ΛCDM Model</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','timeline')"><span class="nav-dot"></span>Timeline</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','stdmodel')"><span class="nav-dot"></span>Standard Model</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','periodic')"><span class="nav-dot"></span>Periodic Table</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','galaxies')"><span class="nav-dot"></span>Galaxies</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','stars')"><span class="nav-dot"></span>Stars</div>
+  <div class="nav-item" onclick="showPage('physics');showSub('physics','planets')"><span class="nav-dot"></span>Planets</div>
+
+  <div class="nav-section">III. Earth</div>
+  <div class="nav-item" onclick="showPage('earth')"><span class="nav-dot"></span>Solar System</div>
+  <div class="nav-item" onclick="showPage('earth');showSub('earth','treeof')"><span class="nav-dot"></span>Tree of Life</div>
+  <div class="nav-item" onclick="showPage('earth');showSub('earth','biosig')"><span class="nav-dot"></span>Biosignatures</div>
+  <div class="nav-item" onclick="showPage('earth');showSub('earth','sounds')"><span class="nav-dot"></span>Images & Sounds</div>
+
+  <div class="nav-section">IV. Humans</div>
+  <div class="nav-item" onclick="showPage('humans')"><span class="nav-dot"></span>Anatomy</div>
+  <div class="nav-item" onclick="showPage('humans');showSub('humans','history')"><span class="nav-dot"></span>Human History</div>
+  <div class="nav-item" onclick="showPage('humans');showSub('humans','greetings')"><span class="nav-dot"></span>Greetings</div>
+  <div class="nav-item" onclick="showPage('humans');showSub('humans','culture')"><span class="nav-dot"></span>Culture</div>
+  <div class="nav-item" onclick="showPage('humans');showSub('humans','tech')"><span class="nav-dot"></span>Technology</div>
+  <div class="nav-item" onclick="showPage('humans');showSub('humans','science')"><span class="nav-dot"></span>Science</div>
+</nav>
+
+<!-- ════ MAIN ════ -->
+<div id="main">
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1: NUMBERS
+════════════════════════════════════════════ -->
+<div id="page-numbers" class="page active">
+  <div class="page-hero">
+    <div class="page-eyebrow">Section I</div>
+    <div class="page-title">Numbers &amp; Conversions</div>
+    <div class="page-desc">Mathematics is the only language we can be confident is universal. We begin here.</div>
+  </div>
+
+  <div class="content">
+
+    <h2>1. Prime Numbers</h2>
+    <p>Primes are numbers divisible only by 1 and themselves. They are not a human invention — they are a structural feature of arithmetic. Any civilisation that counts will discover them. We list the first 1000 primes as proof of shared mathematical ground.</p>
+    <div class="widget">
+      <div class="widget-title">First 1000 Prime Numbers</div>
+      <div class="prime-grid" id="primeGrid"></div>
+    </div>
+
+    <h2>2. Number-Base Conversions</h2>
+    <p>We use three bases: <em>binary (base-2)</em> — the language of computation; <em>decimal (base-10)</em> — our everyday counting system; and <em>duodecimal (base-12)</em> — a mathematically elegant base divisible by 2, 3, 4, and 6, preferred by some as a natural universal base. The widget below converts between all three.</p>
+
+    <div class="widget">
+      <div class="widget-title">Live Base Converter</div>
+      <div class="converter-grid">
+        <div class="conv-field">
+          <label>Binary (base-2)</label>
+          <input id="binIn" type="text" placeholder="e.g. 101010" oninput="convertFrom('bin')">
+        </div>
+        <div class="conv-field">
+          <label>Decimal (base-10)</label>
+          <input id="decIn" type="text" placeholder="e.g. 42" oninput="convertFrom('dec')">
+        </div>
+        <div class="conv-field">
+          <label>Duodecimal (base-12)</label>
+          <input id="dodIn" type="text" placeholder="e.g. 36" oninput="convertFrom('dod')">
+        </div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin:0">Duodecimal uses digits 0–9 then A (ten) and B (eleven).</p>
+    </div>
+
+    <p>The diagram below shows binary positional notation — each bit position represents a power of 2:</p>
+    <div class="widget">
+      <div class="widget-title">Binary Positional Notation — Example: 101010₂ = 42₁₀</div>
+      <svg viewBox="0 0 600 120" style="width:100%;max-width:500px;font-family:var(--mono)">
+        <g fill="none">
+          <!-- boxes -->
+          <g fill="rgba(200,168,70,0.08)" stroke="rgba(200,168,70,0.3)" stroke-width="1">
+            <rect x="20" y="10" width="80" height="40" rx="2"/>
+            <rect x="110" y="10" width="80" height="40" rx="2"/>
+            <rect x="200" y="10" width="80" height="40" rx="2"/>
+            <rect x="290" y="10" width="80" height="40" rx="2"/>
+            <rect x="380" y="10" width="80" height="40" rx="2"/>
+            <rect x="470" y="10" width="80" height="40" rx="2"/>
+          </g>
+          <!-- digits -->
+          <text x="60" y="36" text-anchor="middle" fill="#FFFFFF" font-size="18">1</text>
+          <text x="150" y="36" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="18">0</text>
+          <text x="240" y="36" text-anchor="middle" fill="#FFFFFF" font-size="18">1</text>
+          <text x="330" y="36" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="18">0</text>
+          <text x="420" y="36" text-anchor="middle" fill="#FFFFFF" font-size="18">1</text>
+          <text x="510" y="36" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="18">0</text>
+          <!-- powers -->
+          <text x="60" y="62" text-anchor="middle" fill="#c8a846" font-size="9">2⁵=32</text>
+          <text x="150" y="62" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9">2⁴=16</text>
+          <text x="240" y="62" text-anchor="middle" fill="#c8a846" font-size="9">2³=8</text>
+          <text x="330" y="62" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9">2²=4</text>
+          <text x="420" y="62" text-anchor="middle" fill="#c8a846" font-size="9">2¹=2</text>
+          <text x="510" y="62" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="9">2⁰=1</text>
+          <!-- result -->
+          <text x="300" y="100" text-anchor="middle" fill="#C8A84B" font-size="11">32 + 0 + 8 + 0 + 2 + 0 = 42</text>
+        </g>
+      </svg>
+    </div>
+
+    <h2>3. Physical &amp; Mathematical Constants</h2>
+    <p>Constants are the universe's fixed parameters — quantities that do not vary with location, time, or observer. They are the shared vocabulary of physics.</p>
+    <div class="widget">
+      <div class="widget-title">Selected Universal Constants</div>
+      <table class="const-table">
+        <thead><tr><th>Symbol</th><th>Name</th><th>Value</th><th>Significance</th></tr></thead>
+        <tbody>
+          <tr><td class="sym">α</td><td>Fine-structure constant</td><td class="val">≈ 1/137.036</td><td class="desc">Dimensionless strength of electromagnetism. Same everywhere.</td></tr>
+          <tr><td class="sym">c</td><td>Speed of light</td><td class="val">299,792,458 m/s</td><td class="desc">Universal causal speed limit.</td></tr>
+          <tr><td class="sym">G</td><td>Gravitational constant</td><td class="val">6.674×10⁻¹¹ m³kg⁻¹s⁻²</td><td class="desc">Governs curvature of spacetime by mass.</td></tr>
+          <tr><td class="sym">ħ</td><td>Reduced Planck constant</td><td class="val">1.055×10⁻³⁴ J·s</td><td class="desc">Quantum of action; granularity of the physical world.</td></tr>
+          <tr><td class="sym">k<sub>B</sub></td><td>Boltzmann constant</td><td class="val">1.381×10⁻²³ J/K</td><td class="desc">Links microscopic energy to temperature.</td></tr>
+          <tr><td class="sym">e</td><td>Elementary charge</td><td class="val">1.602×10⁻¹⁹ C</td><td class="desc">Charge of one proton / one electron.</td></tr>
+          <tr><td class="sym">π</td><td>Pi</td><td class="val">3.14159265358979…</td><td class="desc">Ratio of circle circumference to diameter.</td></tr>
+          <tr><td class="sym">e</td><td>Euler's number</td><td class="val">2.71828182845904…</td><td class="desc">Base of natural logarithm; governs growth and decay.</td></tr>
+          <tr><td class="sym">φ</td><td>Golden ratio</td><td class="val">1.61803398874989…</td><td class="desc">(1+√5)/2 — appears in geometry and nature.</td></tr>
+        </tbody>
+      </table>
+      <a class="ext-link" href="https://en.wikipedia.org/wiki/List_of_mathematical_constants" target="_blank">Full List of Mathematical Constants (Wikipedia)</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2: UNIVERSAL PHYSICS
+════════════════════════════════════════════ -->
+<div id="page-physics" class="page">
+  <div class="page-hero">
+    <div class="page-eyebrow">Section II</div>
+    <div class="page-title">Universal Physics</div>
+    <div class="page-desc">The laws that govern everything — from the smallest particle to the largest structure in the cosmos.</div>
+  </div>
+
+  <div class="subtabs" id="subtabs-physics">
+    <div class="subtab active" onclick="showSub('physics','acdm')">ΛCDM</div>
+    <div class="subtab" onclick="showSub('physics','timeline')">Timeline</div>
+    <div class="subtab" onclick="showSub('physics','stdmodel')">Standard Model</div>
+    <div class="subtab" onclick="showSub('physics','periodic')">Periodic Table</div>
+    <div class="subtab" onclick="showSub('physics','galaxies')">Galaxies</div>
+    <div class="subtab" onclick="showSub('physics','stars')">Stars</div>
+    <div class="subtab" onclick="showSub('physics','planets')">Planets</div>
+  </div>
+
+  <!-- ΛCDM -->
+  <div id="sub-physics-acdm" class="subpage active content">
+    <h2>The ΛCDM Cosmological Model</h2>
+    <p>Our best description of the universe at its largest scales. A nearly flat spacetime expanding under the influence of cold dark matter and a constant vacuum energy density (Λ) that currently dominates and drives accelerating expansion.</p>
+
+    <h3>Composition of the Universe</h3>
+    <div class="comp-row">
+      <svg id="pieSvg" viewBox="0 0 200 200" width="200" height="200" style="flex-shrink:0;filter:drop-shadow(0 0 16px rgba(200,168,70,0.2))">
+        <path d="M100,100 L100,10 A90,90 0 1,1 51.8,172.4 Z" fill="#c8a846" opacity="0.85"/>
+        <path d="M100,100 L51.8,172.4 A90,90 0 0,1 13.6,54.7 Z" fill="#7eb8d4" opacity="0.75"/>
+        <path d="M100,100 L13.6,54.7 A90,90 0 0,1 100,10 Z" fill="#C8A84B" opacity="0.8"/>
+        <circle cx="100" cy="100" r="38" fill="var(--void)"/>
+        <text x="100" y="97" text-anchor="middle" fill="var(--ice)" font-family="Josefin Sans,sans-serif" font-size="9" letter-spacing="1">ΛCDM</text>
+        <text x="100" y="109" text-anchor="middle" fill="rgba(200,168,70,0.5)" font-family='Josefin Sans,sans-serif' font-size="6">universe</text>
+      </svg>
+      <div class="comp-bars">
+        <div class="comp-bar-item">
+          <div class="comp-bar-label">
+            <span style="color:var(--gold)">Dark Energy (Λ)</span>
+            <span style="color:var(--gold);font-family:var(--mono)">68%</span>
+          </div>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:68%;background:var(--gold)"></div></div>
+          <p style="font-size:0.82rem;color:var(--muted);margin-top:0.3rem">Vacuum energy driving accelerating expansion. Nature unknown.</p>
+        </div>
+        <div class="comp-bar-item">
+          <div class="comp-bar-label">
+            <span style="color:var(--silver)">Dark Matter (CDM)</span>
+            <span style="color:var(--silver);font-family:var(--mono)">27%</span>
+          </div>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:27%;background:var(--silver)"></div></div>
+          <p style="font-size:0.82rem;color:var(--muted);margin-top:0.3rem">Gravitates but does not emit light. Detected only gravitationally.</p>
+        </div>
+        <div class="comp-bar-item">
+          <div class="comp-bar-label">
+            <span style="color:var(--green)">Ordinary Matter</span>
+            <span style="color:var(--green);font-family:var(--mono)">5%</span>
+          </div>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:5%;background:var(--green)"></div></div>
+          <p style="font-size:0.82rem;color:var(--muted);margin-top:0.3rem">Atoms. Every star, planet, and living thing ever observed.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Friedmann Equations</h3>
+    <p>Derived from Einstein's general relativity, these equations describe how a homogeneous, isotropic universe expands over time.</p>
+    <div class="eq-block">
+      <div class="eq-label">Friedmann I — Expansion Rate</div>
+      <div class="eq">H² = (ȧ/a)² = (8πG/3)ρ − kc²/a² + Λc²/3</div>
+      <div class="eq-note">H = Hubble parameter | a = scale factor | ρ = energy density | k = spatial curvature (≈0, flat) | Λ = cosmological constant</div>
+    </div>
+    <div class="eq-block">
+      <div class="eq-label">Friedmann II — Acceleration</div>
+      <div class="eq">ä/a = −(4πG/3)(ρ + 3p/c²) + Λc²/3</div>
+      <div class="eq-note">ä > 0 means accelerating expansion. The Λ term currently dominates, confirmed by Type Ia supernova observations (Nobel Prize 2011).</div>
+    </div>
+    <div class="pullquote">The universe is not merely expanding — it is accelerating. Everything beyond our local group of galaxies is receding faster with every passing moment. On cosmic timescales, distant galaxies will eventually cross beyond our observational horizon entirely.</div>
+    <h3>Key Evidence</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🔴</div><div class="card-title">Galaxy Redshifts</div><p>All distant galaxies recede; the further, the faster. Space itself is expanding.</p></div>
+      <div class="card"><div class="card-icon">💥</div><div class="card-title">Type Ia Supernovae</div><p>Standard candles fainter than expected — the universe is accelerating, not decelerating.</p></div>
+      <div class="card"><div class="card-icon">🌡️</div><div class="card-title">CMB</div><p>Thermal afterglow of the early universe at 2.725 K. Tiny fluctuations match ΛCDM predictions precisely.</p></div>
+      <div class="card"><div class="card-icon">🌀</div><div class="card-title">Rotation Curves</div><p>Galactic stars orbit too fast for visible matter alone. Dark matter haloes required.</p></div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="sub-physics-timeline" class="subpage content">
+    <h2>Timeline of the Universe</h2>
+    <p>From the Big Bang to the present day — a history shared by every observer in the observable universe.</p>
+    <div style="text-align:center;margin:1.5rem 0">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/CMB_Timeline300_no_WMAP.jpg/1200px-CMB_Timeline300_no_WMAP.jpg"
+        alt="Timeline of the Universe" style="width:100%;max-width:700px;border-radius:3px;border:1px solid var(--border)"
+        onerror="this.style.display='none'">
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;font-style:italic">NASA/WMAP Science Team — Timeline from Big Bang to present</p>
+    </div>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot" style="background:var(--rose)"></div><div class="tl-time">t = 10⁻³⁶ s</div><div class="tl-name">Inflation</div><div class="tl-desc">Exponential expansion smooths the universe; quantum fluctuations seed all future structure.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:#a0e0b0"></div><div class="tl-time">t ≈ 3 minutes</div><div class="tl-name">Big Bang Nucleosynthesis</div><div class="tl-desc">Protons and neutrons fuse into hydrogen and helium nuclei. ~75% H, ~25% He by mass.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">t ≈ 380,000 years</div><div class="tl-name">Recombination &amp; CMB Release</div><div class="tl-desc">Universe cools enough for neutral atoms to form. Space becomes transparent. The CMB is released.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">t ≈ 200 million years</div><div class="tl-name">Cosmic Dawn — First Stars</div><div class="tl-desc">First massive stars ignite, forging heavy elements. The cosmic dark ages end.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">t ≈ 1 billion years</div><div class="tl-name">First Galaxies</div><div class="tl-desc">Dark matter haloes merge; galaxies form along the cosmic web filaments.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">t ≈ 9.2 billion years</div><div class="tl-name">Formation of Our Solar System</div><div class="tl-desc">A protoplanetary disc of heavy-element-enriched gas collapses around a new G-type star.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">t ≈ 13.4 billion years</div><div class="tl-name">First Life on Earth</div><div class="tl-desc">Chemical self-replication begins in Earth's oceans. LUCA appears.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--gold);box-shadow:0 0 10px rgba(200,168,70,0.7)"></div><div class="tl-time">t = 13.8 billion years</div><div class="tl-name">Now</div><div class="tl-desc">A dark-energy-dominated, accelerating universe. One intelligent species has begun to ask questions about it.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:rgba(200,168,70,0.2);box-shadow:none"></div><div class="tl-time">t → ∞</div><div class="tl-name">Heat Death</div><div class="tl-desc">If Λ persists, expansion accelerates forever. Stars exhaust their fuel. Entropy maximises.</div></div>
+    </div>
+  </div>
+
+  <!-- STANDARD MODEL -->
+  <div id="sub-physics-stdmodel" class="subpage content">
+    <h2>The Standard Model of Particle Physics</h2>
+    <p>The quantum field theory describing all known fundamental particles and three of the four fundamental forces (electromagnetic, weak nuclear, strong nuclear). Gravity is not yet incorporated. Despite this, it is the most precisely tested theory in science.</p>
+    <p>Confirmed by the discovery of the <em>Higgs boson</em> at CERN's Large Hadron Collider in 2012.</p>
+
+    <div class="widget">
+      <div class="widget-title">Standard Model Particle Table</div>
+      <div class="sm-grid" id="smGrid"></div>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:1rem">
+        <span style="font-family:var(--mono);font-size:0.65rem"><span style="color:#C8A84B">■</span> Quarks</span>
+        <span style="font-family:var(--mono);font-size:0.65rem"><span style="color:var(--rose)">■</span> Leptons</span>
+        <span style="font-family:var(--mono);font-size:0.65rem"><span style="color:var(--gold)">■</span> Bosons</span>
+        <span style="font-family:var(--mono);font-size:0.65rem"><span style="color:var(--silver)">■</span> Higgs</span>
+      </div>
+    </div>
+    <p>The Standard Model is irreconcilable with the macro-scale ΛCDM cosmological model — it does not explain dark matter, dark energy, or gravity at quantum scales. A unified theory remains the central unsolved problem of physics.</p>
+  </div>
+
+  <!-- PERIODIC TABLE -->
+  <div id="sub-physics-periodic" class="subpage content">
+    <h2>The Periodic Table of Elements</h2>
+    <p>All known chemical elements organised by increasing atomic number and recurring patterns in chemical properties. 118 elements confirmed. The same elements exist throughout the observable universe, identifiable by their unique spectral signatures.</p>
+    <div class="widget" style="overflow-x:auto">
+      <div class="widget-title">Periodic Table of the Elements</div>
+      <div class="pt" id="ptGrid" style="min-width:700px"></div>
+      <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:1rem">
+        <span style="font-size:0.65rem;font-family:var(--mono)"><span style="color:#C8A84B">■</span> Nonmetal</span>
+        <span style="font-size:0.65rem;font-family:var(--mono)"><span style="color:var(--silver)">■</span> Noble Gas</span>
+        <span style="font-size:0.65rem;font-family:var(--mono)"><span style="color:var(--gold)">■</span> Metal</span>
+        <span style="font-size:0.65rem;font-family:var(--mono)"><span style="color:#a080c0">■</span> Transition</span>
+        <span style="font-size:0.65rem;font-family:var(--mono)"><span style="color:var(--rose)">■</span> Metalloid</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALAXIES -->
+  <div id="sub-physics-galaxies" class="subpage content">
+    <h2>Galaxies &amp; Large-Scale Structure</h2>
+    <p>Galaxies are gravitationally bound systems of stars, gas, dust, and dark matter. At the largest scales, they form a cosmic web of filaments, sheets, and voids.</p>
+    <h3>Galaxy Morphologies</h3>
+    <div class="galaxy-row">
+      <div class="galaxy-item">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <radialGradient id="ellG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d4a843" stop-opacity="0.9"/><stop offset="60%" stop-color="#7a5020" stop-opacity="0.4"/><stop offset="100%" stop-color="#2a1a08" stop-opacity="0"/></radialGradient>
+          <ellipse cx="60" cy="60" rx="50" ry="32" fill="url(#ellG)"/>
+        </svg>
+        <div class="galaxy-name">Elliptical</div>
+      </div>
+      <div class="galaxy-item">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <radialGradient id="spirG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c8a846" stop-opacity="0.95"/><stop offset="30%" stop-color="#8a6030" stop-opacity="0.6"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <circle cx="60" cy="60" r="52" fill="rgba(200,168,70,0.04)"/>
+          <path d="M60,60 Q90,30 80,10 Q110,40 80,60 Q110,80 80,110 Q60,85 60,60" fill="none" stroke="rgba(200,168,70,0.5)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M60,60 Q30,90 40,110 Q10,80 40,60 Q10,40 40,10 Q60,35 60,60" fill="none" stroke="rgba(200,168,70,0.5)" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="60" cy="60" r="12" fill="url(#spirG)"/>
+        </svg>
+        <div class="galaxy-name">Spiral</div>
+      </div>
+      <div class="galaxy-item">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <radialGradient id="lentG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d4a843" stop-opacity="0.9"/><stop offset="50%" stop-color="#7a5020" stop-opacity="0.5"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+          <ellipse cx="60" cy="60" rx="52" ry="20" fill="url(#lentG)" opacity="0.7"/>
+          <ellipse cx="60" cy="60" rx="35" ry="25" fill="url(#lentG)" opacity="0.5"/>
+          <ellipse cx="60" cy="60" rx="15" ry="15" fill="url(#lentG)"/>
+        </svg>
+        <div class="galaxy-name">Lenticular</div>
+      </div>
+      <div class="galaxy-item">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <g opacity="0.8">
+            <circle cx="40" cy="50" r="14" fill="rgba(200,168,70,0.3)"/>
+            <circle cx="70" cy="35" r="10" fill="rgba(180,150,60,0.3)"/>
+            <circle cx="80" cy="65" r="16" fill="rgba(200,168,70,0.25)"/>
+            <circle cx="50" cy="78" r="12" fill="rgba(180,140,50,0.3)"/>
+            <circle cx="30" cy="75" r="8" fill="rgba(200,168,70,0.2)"/>
+            <circle cx="90" cy="45" r="7" fill="rgba(180,150,60,0.2)"/>
+          </g>
+        </svg>
+        <div class="galaxy-name">Irregular</div>
+      </div>
+    </div>
+    <h3>Large-Scale Structure</h3>
+    <p>Matter in the universe forms a cosmic web: vast filaments of galaxies separated by near-empty voids, with galaxy clusters at the intersections. This structure emerged from tiny quantum fluctuations in the early universe amplified by gravity over 13.8 billion years.</p>
+    <div class="widget" style="background:rgba(2,4,10,0.95)">
+      <div class="widget-title">Simulated Cosmic Web</div>
+      <canvas id="webCanvas" width="600" height="250" style="width:100%;border-radius:2px"></canvas>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem;margin-bottom:0">Schematic of filaments, nodes, and voids in the large-scale structure of the universe.</p>
+    </div>
+  </div>
+
+  <!-- STARS -->
+  <div id="sub-physics-stars" class="subpage content">
+    <h2>Stars — Cosmic Forges</h2>
+    <p>Stars are gravitationally confined nuclear fusion reactors. They are the factories that produce every element heavier than hydrogen and helium, and they distribute those elements through the universe when they die.</p>
+    <h3>The Hertzsprung-Russell Diagram</h3>
+    <p>Organises stars by luminosity (vertical) and surface temperature (horizontal). The diagonal main sequence is where stars spend most of their lives fusing hydrogen.</p>
+    <div class="widget" style="background:rgba(2,4,10,0.95)">
+      <div class="widget-title">Hertzsprung-Russell Diagram</div>
+      <canvas id="hrCanvas" width="600" height="420" style="width:100%;max-width:600px;display:block"></canvas>
+    </div>
+    <h3>Stellar Lifecycle</h3>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot" style="background:var(--ice)"></div><div class="tl-name">Nebula / Molecular Cloud</div><div class="tl-desc">Gravity causes a cloud of gas and dust to collapse. As it contracts, it heats up.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:#ffaa44"></div><div class="tl-name">Protostar</div><div class="tl-desc">A dense core forms. Temperatures rise until hydrogen fusion ignites.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:#ffe066"></div><div class="tl-name">Main Sequence Star</div><div class="tl-desc">Fuses hydrogen into helium for millions to billions of years. Our Sun is here now.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:#ff6644"></div><div class="tl-name">Red Giant / Supergiant</div><div class="tl-desc">Hydrogen exhausted. Core contracts; outer layers expand. Fusion of heavier elements begins.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-name">Death: Supernova / Planetary Nebula</div><div class="tl-desc">Massive stars explode as supernovae, seeding space with heavy elements. Smaller stars shed outer layers gently.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--silver)"></div><div class="tl-name">Remnant: White Dwarf / Neutron Star / Black Hole</div><div class="tl-desc">The stellar core remains. Mass determines the endpoint: white dwarf, neutron star, or black hole.</div></div>
+    </div>
+    <p>We are made of stardust — literally. Every element in our bodies heavier than hydrogen was forged in a stellar core and ejected in a stellar death.</p>
+    <a class="ext-link" href="https://dimit.me/Fe26/index.html" target="_blank">Interactive: Build Iron-56 in a Star</a>
+  </div>
+
+  <!-- PLANETS -->
+  <div id="sub-physics-planets" class="subpage content">
+    <h2>Planets &amp; Planetary Systems</h2>
+    <p>Thousands of exoplanets have now been confirmed, revealing a vast diversity of planetary types far beyond what our own Solar System contains.</p>
+    <h3>Planetary Types</h3>
+    <div class="planet-row">
+      <div class="planet-item">
+        <div class="planet-circle" style="width:80px;height:80px;background:radial-gradient(circle at 35% 30%,#e8c060,#a06010 60%,#402008);box-shadow:0 0 20px rgba(200,140,40,0.4)"></div>
+        <div class="planet-name">Hot Jupiter</div>
+      </div>
+      <div class="planet-item">
+        <div class="planet-circle" style="width:64px;height:64px;background:radial-gradient(circle at 35% 30%,#80b0e0,#204080 60%,#0a1830);box-shadow:0 0 14px rgba(80,140,220,0.3)"></div>
+        <div class="planet-name">Ice Giant</div>
+      </div>
+      <div class="planet-item">
+        <div class="planet-circle" style="width:50px;height:50px;background:radial-gradient(circle at 35% 30%,#a0c0e8,#506080 60%,#182030);box-shadow:0 0 10px rgba(100,160,220,0.2)"></div>
+        <div class="planet-name">Sub-Neptune</div>
+      </div>
+      <div class="planet-item">
+        <div class="planet-circle" style="width:42px;height:42px;background:radial-gradient(circle at 35% 30%,#c0a080,#806040 60%,#302010);box-shadow:0 0 8px rgba(180,140,80,0.3)"></div>
+        <div class="planet-name">Super-Earth</div>
+      </div>
+      <div class="planet-item">
+        <div class="planet-circle" style="width:34px;height:34px;background:radial-gradient(circle at 35% 30%,#60c090,#206040 60%,#082010);border:1px solid rgba(60,200,100,0.3);box-shadow:0 0 10px rgba(60,200,100,0.25)"></div>
+        <div class="planet-name">Habitable Zone</div>
+      </div>
+      <div class="planet-item">
+        <div class="planet-circle" style="width:28px;height:28px;background:radial-gradient(circle at 35% 30%,#c09070,#805040 60%,#301810)"></div>
+        <div class="planet-name">Rocky</div>
+      </div>
+    </div>
+    <p>As of this transmission, over 5,500 exoplanets have been confirmed in our galaxy alone. Statistical extrapolation suggests the Milky Way contains billions of rocky planets in the habitable zones of their host stars.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3: EARTH
+════════════════════════════════════════════ -->
+<div id="page-earth" class="page">
+  <div class="page-hero">
+    <div class="page-eyebrow">Section III</div>
+    <div class="page-title">The Earth as a Living Planet</div>
+    <div class="page-desc">Not special in its composition — extraordinary in what it hosts.</div>
+  </div>
+  <div class="subtabs" id="subtabs-earth">
+    <div class="subtab active" onclick="showSub('earth','solar')">Solar System</div>
+    <div class="subtab" onclick="showSub('earth','treeof')">Tree of Life</div>
+    <div class="subtab" onclick="showSub('earth','biosig')">Biosignatures</div>
+    <div class="subtab" onclick="showSub('earth','sounds')">Images &amp; Sounds</div>
+  </div>
+
+  <!-- SOLAR SYSTEM -->
+  <div id="sub-earth-solar" class="subpage active content">
+    <h2>Solar System &amp; Planet Formation</h2>
+    <p>Our Solar System formed approximately 4.6 billion years ago from the gravitational collapse of a cloud of gas and dust. A central star ignited; the remaining disc of material accreted into planets, moons, asteroids, and comets over tens of millions of years.</p>
+    <div class="widget" style="background:rgba(2,4,10,0.98);overflow:hidden">
+      <div class="widget-title">Our Solar System</div>
+      <canvas id="solarCanvas" width="800" height="160" style="width:100%"></canvas>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="card-title">Rocky Terrestrial Planets</div><p>Mercury, Venus, Earth, Mars. Dense iron cores, silicate mantles, thin or no atmospheres (except Venus/Earth).</p></div>
+      <div class="card"><div class="card-title">Asteroid Belt</div><p>Between Mars and Jupiter. Rocky and metallic bodies — material that never coalesced into a planet due to Jupiter's gravitational influence.</p></div>
+      <div class="card"><div class="card-title">Gas Giants</div><p>Jupiter and Saturn. Massive hydrogen-helium envelopes. No solid surface. Jupiter's mass exceeds all other planets combined.</p></div>
+      <div class="card"><div class="card-title">Ice Giants &amp; Kuiper Belt</div><p>Uranus and Neptune. Water, methane, ammonia ices beneath hydrogen atmospheres. Beyond: the Kuiper belt, Pluto, and the Oort cloud.</p></div>
+    </div>
+  </div>
+
+  <!-- TREE OF LIFE -->
+  <div id="sub-earth-treeof" class="subpage content">
+    <h2>Evolution &amp; Tree of Life</h2>
+    <p>All life on Earth descended from a single common ancestor (LUCA — Last Universal Common Ancestor) approximately 3.8 billion years ago. Four billion years of evolution by natural selection has produced the extraordinary diversity of life we observe today.</p>
+    <div class="pullquote">Every organism alive — from archaea in hydrothermal vents to blue whales to the oak tree outside a window — is your cousin. The tree of life is the most comprehensive genealogy ever traced.</div>
+    <div class="widget">
+      <div class="widget-title">Interactive Tree of Life (OneZoom)</div>
+      <iframe class="embed-frame" height="520" src="https://www.onezoom.org/life/@biota=93302?vis=polytomy#x762,y1311,w2.2515" title="OneZoom Tree of Life" loading="lazy" style="border:none"></iframe>
+    </div>
+    <h3>Key Evolutionary Milestones</h3>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~3.8 Gya</div><div class="tl-name">LUCA</div><div class="tl-desc">Last Universal Common Ancestor. Solvent (water), cell membrane, genetic material (RNA/DNA). The minimum architecture of life.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~2.7 Gya</div><div class="tl-name">Photosynthesis</div><div class="tl-desc">Cyanobacteria begin producing oxygen. Atmosphere transformed. The Great Oxidation Event reshapes Earth.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~600 Mya</div><div class="tl-name">Multicellular Animals</div><div class="tl-desc">Complex animals emerge. The Cambrian explosion diversifies body plans explosively.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~65 Mya</div><div class="tl-name">Mammalian Diversification</div><div class="tl-desc">Mass extinction of non-avian dinosaurs opens ecological niches. Mammals diversify rapidly.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-time">~300,000 ya</div><div class="tl-name">Homo sapiens</div><div class="tl-desc">Anatomically modern humans appear. Language, symbolic thought, and cumulative culture emerge.</div></div>
+    </div>
+  </div>
+
+  <!-- BIOSIGNATURES -->
+  <div id="sub-earth-biosig" class="subpage content">
+    <h2>Biosignatures from Earth</h2>
+    <p>Observable signatures of life detectable from space — what an alien observer might notice about our planet.</p>
+    <div class="widget">
+      <table class="biosig">
+        <thead><tr><th>Biosignature</th><th>Type</th><th>Description</th><th>Detectable How</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Atmospheric Oxygen (O₂)</strong></td><td>Chemical</td><td>21% O₂ is thermodynamically unstable without continuous biological replenishment via photosynthesis.</td><td>Spectroscopy of atmosphere</td></tr>
+          <tr><td><strong>Ozone (O₃)</strong></td><td>Chemical</td><td>Photochemical product of biogenic O₂. Strong UV absorption band.</td><td>UV/IR spectroscopy</td></tr>
+          <tr><td><strong>Methane (CH₄)</strong></td><td>Chemical</td><td>Produced by methanogenic microbes. Coexistence with O₂ is disequilibrium: they react and would vanish without ongoing production.</td><td>IR spectroscopy</td></tr>
+          <tr><td><strong>Vegetation Red Edge</strong></td><td>Spectral</td><td>Sharp increase in reflectance at ~700 nm from chlorophyll in land plants. A distinctive spectral feature of photosynthetic life.</td><td>Reflectance spectroscopy</td></tr>
+          <tr><td><strong>Artificial Radio Emissions</strong></td><td>Technological</td><td>Modulated radio/microwave emissions inconsistent with natural sources. Broadcasting began ~1900 CE.</td><td>Radio telescope</td></tr>
+          <tr><td><strong>Artificial Light at Night</strong></td><td>Technological</td><td>Visible-light emission from the night side of the planet, concentrated in patterns matching continental coastlines.</td><td>Optical imaging</td></tr>
+          <tr><td><strong>Industrial Pollution</strong></td><td>Chemical</td><td>Nitrogen dioxide (NO₂), chlorofluorocarbons (CFCs) — molecules with no known natural source at observed concentrations.</td><td>Spectroscopy</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- IMAGES & SOUNDS -->
+  <div id="sub-earth-sounds" class="subpage content">
+    <h2>Images &amp; Sounds of Earth</h2>
+    <p>The original Voyager Golden Record included 115 images and an extensive collection of natural sounds. We include those original recordings here, alongside an updated visual and acoustic portrait of Earth.</p>
+    <div class="widget">
+      <div class="widget-title">NASA — Original Golden Record: Sounds of Earth</div>
+      <iframe class="embed-frame" height="160" scrolling="no" frameborder="no" allow="autoplay"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/nasa/sets/golden-record-sounds-of&color=%23c8a846&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+      </iframe>
+    </div>
+    <p>The sounds include: ocean waves, wind, thunder, animal calls (whale song, bird calls, insects), human heartbeat and laughter, and music from around the world. They represent Earth's acoustic ecology at a moment in time.</p>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🌊</div><div class="card-title">Natural Soundscapes</div><p>Ocean, wind, rain, thunder, volcanoes. The acoustic texture of a living planet.</p></div>
+      <div class="card"><div class="card-icon">🐋</div><div class="card-title">Animal Voices</div><p>Whale song, bird calls, insect stridulation, frog choruses. An acoustic census of Earth's biosphere.</p></div>
+      <div class="card"><div class="card-icon">🌍</div><div class="card-title">Earth from Space</div><p>The Pale Blue Dot — our planet as a distant observer would see it: a mote of dust in a sunbeam.</p></div>
+      <div class="card"><div class="card-icon">🎵</div><div class="card-title">Music of Earth</div><p>Bach, Beethoven, Javanese gamelan, Senegalese percussion, Georgian polyphony, Azerbaijani bagpipe, and more.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4: HUMANS
+════════════════════════════════════════════ -->
+<div id="page-humans" class="page">
+  <div class="page-hero">
+    <div class="page-eyebrow">Section IV</div>
+    <div class="page-title">Humans &amp; the Anthropocene</div>
+    <div class="page-desc">The species that built this record — in full complexity, not just our finest moments.</div>
+  </div>
+  <div class="subtabs" id="subtabs-humans">
+    <div class="subtab active" onclick="showSub('humans','anatomy')">Anatomy</div>
+    <div class="subtab" onclick="showSub('humans','history')">History</div>
+    <div class="subtab" onclick="showSub('humans','greetings')">Greetings</div>
+    <div class="subtab" onclick="showSub('humans','culture')">Culture</div>
+    <div class="subtab" onclick="showSub('humans','tech')">Technology</div>
+    <div class="subtab" onclick="showSub('humans','science')">Science</div>
+  </div>
+
+  <!-- ANATOMY -->
+  <div id="sub-humans-anatomy" class="subpage active content">
+    <h2>Human Anatomy</h2>
+    <p>We are bilaterally symmetrical, warm-blooded, oxygen-breathing vertebrates. Average mass ~70 kg. Bipedal locomotion. Greatly enlarged cerebral cortex. Lifespan 70–90 years.</p>
+    <div class="cards">
+      <div class="card"><div class="card-title">Skeletal System</div><p>206 bones. Endoskeleton of calcium phosphate. Provides structure, protects organs, enables movement.</p></div>
+      <div class="card"><div class="card-title">Nervous System</div><p>~86 billion neurons. Central (brain + spinal cord) and peripheral. Electrochemical signalling at ~120 m/s.</p></div>
+      <div class="card"><div class="card-title">Cardiovascular System</div><p>Four-chambered heart. ~5 litres of blood. Closed circulatory system pumping ~7,000 litres/day.</p></div>
+      <div class="card"><div class="card-title">Genome</div><p>~3 billion base pairs. ~20,000 protein-coding genes. 99.9% identical between any two humans.</p></div>
+    </div>
+    <a class="ext-link" href="https://www.youtube.com/watch?v=7GPB1sjEhIQ" target="_blank">Human Anatomy Video Overview</a>
+    <a class="ext-link" href="https://www.nlm.nih.gov/research/visible/mpeg/umd_video.mpg" target="_blank">Visible Human Project (NLM)</a>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="sub-humans-history" class="subpage content">
+    <h2>Human History</h2>
+    <p>From the emergence of anatomically modern humans ~300,000 years ago to the 21st century — a compressed account of how a primate species came to reshape a planet.</p>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~300,000 BCE</div><div class="tl-name">Homo sapiens emerge</div><div class="tl-desc">Anatomically modern humans appear in Africa. Symbolic behaviour, language, and tool use.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~70,000 BCE</div><div class="tl-name">Cognitive Revolution</div><div class="tl-desc">Explosion in behavioural complexity. Art, ritual, long-distance trade. Migration out of Africa begins.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~10,000 BCE</div><div class="tl-name">Agricultural Revolution</div><div class="tl-desc">Domestication of plants and animals in multiple independent centres. Permanent settlements; population growth.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~3,000 BCE</div><div class="tl-name">Writing &amp; Early Civilisations</div><div class="tl-desc">Writing systems emerge in Mesopotamia, Egypt, Indus Valley, China. Cities, empires, codified law.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">~500 CE</div><div class="tl-name">Global Connectivity</div><div class="tl-desc">Trade routes span Eurasia and Africa. Ideas, goods, diseases, and technologies cross continents.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1750 CE</div><div class="tl-name">Industrial Revolution</div><div class="tl-desc">Fossil fuels replace muscle power. Mechanised production transforms economies and environments.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1945–present</div><div class="tl-name">The Great Acceleration</div><div class="tl-desc">Population, energy use, carbon emissions, and biodiversity loss all accelerate sharply. Space exploration begins.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-time">Now</div><div class="tl-name">The Anthropocene</div><div class="tl-desc">Humans have become a geological force. Climate, biodiversity, and land surface altered at planetary scale. This record is sent.</div></div>
+    </div>
+  </div>
+
+  <!-- GREETINGS -->
+  <div id="sub-humans-greetings" class="subpage content">
+    <h2>Greetings in World Languages</h2>
+    <p>The original Golden Record included greetings in 55 languages. Our record expands this toward the full ~7,000 living languages — with particular attention to endangered languages. No language is omitted by size of its speaker community.</p>
+    <div class="widget">
+      <div class="widget-title">NASA — Original Golden Record Greetings</div>
+      <iframe class="embed-frame" height="160" scrolling="no" frameborder="no" allow="autoplay"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/nasa/sets/golden-record-greetings-to-the&color=%23c8a846&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+      </iframe>
+    </div>
+    <p>For expanded multilingual translation, we utilise machine translation across 200+ languages:</p>
+    <a class="ext-link" href="https://huggingface.co/docs/transformers/en/model_doc/nllb" target="_blank">NLLB — No Language Left Behind (Meta AI)</a>
+    <div class="pullquote">Language diversity is itself data. The ~7,000 human languages represent 7,000 different ways of structuring experience, time, space, and causality. Their variety tells an alien observer something about the range of minds that produced them.</div>
+  </div>
+
+  <!-- CULTURE -->
+  <div id="sub-humans-culture" class="subpage content">
+    <h2>Culture</h2>
+    <h3>Music</h3>
+    <p>A curated selection spanning every inhabited continent and representing genres from ancient folk traditions to contemporary global forms — from West African drumming and Indian classical raga to electronic music and K-pop.</p>
+    <a class="ext-link" href="https://open.spotify.com/playlist/4Gpwujj4eIY1Ypop8SL8cl" target="_blank">Golden Record Music Playlist (Spotify)</a>
+    <h3>Film</h3>
+    <p>We include <em>WALL-E</em> (2008, Pixar/Disney) as a representative work of human visual storytelling — a film that communicates emotion and narrative almost entirely without language, depicting humanity's relationship with its home planet and the instinct to preserve, create, and connect.</p>
+    <h3>Play</h3>
+    <p>We include <em>Little Alchemy</em> as an interactive demonstration of human thinking about elemental combination and the emergence of complexity from simple components — a playful mirror of how we understand chemistry and creation.</p>
+    <a class="ext-link" href="https://littlealchemy.com/" target="_blank">Little Alchemy — Interactive Game</a>
+    <div class="cards" style="margin-top:1.5rem">
+      <div class="card"><div class="card-icon">🥁</div><div class="card-title">Music</div><p>Bach to Beethoven to Blind Willie Johnson to Mbube. A sonic portrait of human emotional range.</p></div>
+      <div class="card"><div class="card-icon">🎬</div><div class="card-title">Film</div><p>WALL-E: story, emotion, and ecological awareness communicated across the language barrier.</p></div>
+      <div class="card"><div class="card-icon">🎮</div><div class="card-title">Play</div><p>Games represent our capacity for structured imagination — rule systems that generate meaning.</p></div>
+      <div class="card"><div class="card-icon">🎨</div><div class="card-title">Visual Art</div><p>Cave paintings to digital art: 50,000 years of image-making as a form of thinking.</p></div>
+    </div>
+  </div>
+
+  <!-- TECHNOLOGY -->
+  <div id="sub-humans-tech" class="subpage content">
+    <h2>Technology</h2>
+    <p>A snapshot of our civilisation's material capabilities at time of transmission.</p>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🌐</div><div class="card-title">The Internet</div><p>A global network connecting ~5 billion people. Instantaneous exchange of information across any distance on Earth. Emerged from military research; became the nervous system of civilisation.</p></div>
+      <div class="card"><div class="card-icon">📱</div><div class="card-title">Smartphones</div><p>Handheld devices with more computational power than the computers that guided Apollo to the Moon. Access to nearly all recorded human knowledge, carried by most adults on Earth.</p></div>
+      <div class="card"><div class="card-icon">🛸</div><div class="card-title">Space Stations</div><p>The International Space Station — a continuously inhabited orbital laboratory since 2000. Representatives of 19 nations have lived aboard it. Humanity's first permanent off-planet presence.</p></div>
+      <div class="card"><div class="card-icon">☀️</div><div class="card-title">Renewable Energy</div><p>Solar and wind power are now the cheapest forms of electricity generation in history. Transition from fossil fuels underway, prompted by climate change concerns.</p></div>
+      <div class="card"><div class="card-icon">🤖</div><div class="card-title">Artificial Intelligence</div><p>Machine learning systems that can play games, generate language and images, diagnose diseases, and fold proteins. A technology whose implications are still unfolding at time of transmission.</p></div>
+      <div class="card"><div class="card-icon">⚗️</div><div class="card-title">CRISPR Gene Editing</div><p>Precise editing of DNA sequences in living organisms. Potential to cure genetic diseases, engineer crops, and — controversially — modify the human germline.</p></div>
+    </div>
+  </div>
+
+  <!-- SCIENCE -->
+  <div id="sub-humans-science" class="subpage content">
+    <h2>Recent Science &amp; Discovery</h2>
+    <p>Forty-seven years of discovery since the original Golden Record. Selected highlights:</p>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1990</div><div class="tl-name">Pale Blue Dot</div><div class="tl-desc">Voyager 1 photographs Earth from 6 billion km — a mote of dust in a sunbeam. Carl Sagan's commentary becomes iconic.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1992</div><div class="tl-name">First Exoplanet Confirmed</div><div class="tl-desc">Planets orbiting a pulsar discovered. By 2024, over 5,500 exoplanets confirmed across our galaxy.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">1998</div><div class="tl-name">Accelerating Expansion Discovered</div><div class="tl-desc">Type Ia supernovae reveal the universe is not decelerating but accelerating. Dark energy confirmed. Nobel Prize 2011.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">2003</div><div class="tl-name">Human Genome Sequenced</div><div class="tl-desc">~3 billion base pairs mapped. Foundation for genomic medicine, personalised therapy, and population genetics.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">2012</div><div class="tl-name">Higgs Boson Detected</div><div class="tl-desc">The last missing particle of the Standard Model confirmed at CERN's Large Hadron Collider. Nobel Prize 2013.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">2015</div><div class="tl-name">Gravitational Waves Detected</div><div class="tl-desc">LIGO detects spacetime ripples from two merging black holes 1.3 billion light-years away. New observational window on the universe opened. Nobel Prize 2017.</div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div class="tl-time">2019</div><div class="tl-name">First Black Hole Image</div><div class="tl-desc">Event Horizon Telescope captures the shadow of M87* — a black hole 6.5 billion times the mass of our Sun.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--gold)"></div><div class="tl-time">2020s</div><div class="tl-name">Quantum Computing &amp; AI</div><div class="tl-desc">Quantum processors demonstrate computational advantage. Large language models and AI systems reshape knowledge work. AlphaFold solves the protein folding problem.</div></div>
+    </div>
+    <div class="pullquote">Our cosmic address: Solar System → Orion Arm → Milky Way → Local Group → Virgo Supercluster → Laniakea Supercluster → Observable Universe. One of an estimated two trillion galaxies.</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── STARFIELD ──
+(function(){
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<280;i++)stars.push({x:Math.random()*2000,y:Math.random()*2000,r:Math.random()*1.1+0.1,a:Math.random()*0.6+0.1,sp:Math.random()*0.003+0.001,ph:Math.random()*Math.PI*2,col:Math.random()>0.92?'#c8a846':Math.random()>0.85?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.85)'});
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);t++;
+    stars.forEach(s=>{
+      const ax=s.x/2000*W,ay=s.y/2000*H;
+      const a=s.a*(0.5+0.5*Math.sin(s.ph+t*s.sp*200));
+      ctx.beginPath();ctx.arc(ax,ay,s.r,0,Math.PI*2);
+      ctx.fillStyle=s.col;ctx.globalAlpha=a;ctx.fill();
+    });
+    ctx.globalAlpha=1;requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── NAVIGATION ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  // default first subtab
+  const firstSub=document.querySelector('#page-'+id+' .subpage');
+  if(firstSub){
+    document.querySelectorAll('#page-'+id+' .subpage').forEach(s=>s.classList.remove('active'));
+    firstSub.classList.add('active');
+    document.querySelectorAll('#subtabs-'+id+' .subtab').forEach((t,i)=>{t.classList.remove('active');if(i===0)t.classList.add('active')});
+  }
+}
+
+function showSub(page,sub){
+  document.querySelectorAll('#page-'+page+' .subpage').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('sub-'+page+'-'+sub);
+  if(el)el.classList.add('active');
+  const tabs=document.querySelectorAll('#subtabs-'+page+' .subtab');
+  tabs.forEach(t=>t.classList.remove('active'));
+  // activate matching tab by onclick text
+  tabs.forEach(t=>{if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+sub+"'"))t.classList.add('active')});
+}
+
+// ── PRIMES ──
+(function(){
+  const sieve=new Uint8Array(60000).fill(1);sieve[0]=sieve[1]=0;
+  for(let i=2;i<245;i++)if(sieve[i])for(let j=i*i;j<60000;j+=i)sieve[j]=0;
+  const primes=[];
+  for(let i=2;i<60000&&primes.length<1000;i++)if(sieve[i])primes.push(i);
+  const g=document.getElementById('primeGrid');
+  primes.forEach(p=>{const s=document.createElement('span');s.textContent=p;g.appendChild(s)});
+})();
+
+// ── BASE CONVERTER ──
+function convertFrom(src){
+  const bi=document.getElementById('binIn'),di=document.getElementById('decIn'),doi=document.getElementById('dodIn');
+  try{
+    let dec;
+    if(src==='bin'){const v=bi.value.replace(/\s/g,'');if(!/^[01]*$/.test(v))return;dec=parseInt(v,2)||0}
+    else if(src==='dec'){dec=parseInt(di.value)||0}
+    else{const v=doi.value.toUpperCase();dec=parseInt(v,12)||0}
+    if(src!=='bin')bi.value=dec.toString(2);
+    if(src!=='dec')di.value=dec.toString(10);
+    if(src!=='dod')doi.value=dec.toString(12).toUpperCase();
+  }catch(e){}
+}
+
+// ── STANDARD MODEL ──
+(function(){
+  const g=document.getElementById('smGrid');
+  const particles=[
+    // Row 1: quarks gen1,gen2,gen3 + leptons gen1,gen2,gen3 + spacer + bosons
+    {s:'u',n:'up',t:'sm-quark'},{s:'c',n:'charm',t:'sm-quark'},{s:'t',n:'top',t:'sm-quark'},
+    {s:'e',n:'electron',t:'sm-lepton'},{s:'μ',n:'muon',t:'sm-lepton'},{s:'τ',n:'tau',t:'sm-lepton'},
+    {s:'',n:'',t:'sm-empty'},{s:'γ',n:'photon',t:'sm-boson'},
+    // Row 2
+    {s:'d',n:'down',t:'sm-quark'},{s:'s',n:'strange',t:'sm-quark'},{s:'b',n:'bottom',t:'sm-quark'},
+    {s:'νₑ',n:'e-neutrino',t:'sm-lepton'},{s:'νμ',n:'μ-neutrino',t:'sm-lepton'},{s:'ντ',n:'τ-neutrino',t:'sm-lepton'},
+    {s:'',n:'',t:'sm-empty'},{s:'g',n:'gluon',t:'sm-boson'},
+    // Row 3
+    {s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},
+    {s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},
+    {s:'',n:'',t:'sm-empty'},{s:'Z',n:'Z boson',t:'sm-boson'},
+    // Row 4
+    {s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},
+    {s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},{s:'',n:'',t:'sm-empty'},
+    {s:'H',n:'Higgs',t:'sm-higgs'},{s:'W',n:'W boson',t:'sm-boson'},
+  ];
+  particles.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='sm-cell '+p.t;
+    if(p.s)d.innerHTML=`<span class="particle">${p.s}</span><span class="pname">${p.n}</span>`;
+    g.appendChild(d);
+  });
+})();
+
+// ── PERIODIC TABLE ──
+(function(){
+  const elements=[
+    {s:'H',n:1,c:'nonmetal'},{s:'He',n:2,c:'noble'},
+    {s:'Li',n:3,c:'metal'},{s:'Be',n:4,c:'metal'},{s:'B',n:5,c:'metalloid'},{s:'C',n:6,c:'nonmetal'},{s:'N',n:7,c:'nonmetal'},{s:'O',n:8,c:'nonmetal'},{s:'F',n:9,c:'nonmetal'},{s:'Ne',n:10,c:'noble'},
+    {s:'Na',n:11,c:'metal'},{s:'Mg',n:12,c:'metal'},{s:'Al',n:13,c:'metal'},{s:'Si',n:14,c:'metalloid'},{s:'P',n:15,c:'nonmetal'},{s:'S',n:16,c:'nonmetal'},{s:'Cl',n:17,c:'nonmetal'},{s:'Ar',n:18,c:'noble'},
+    {s:'K',n:19,c:'metal'},{s:'Ca',n:20,c:'metal'},{s:'Sc',n:21,c:'transition'},{s:'Ti',n:22,c:'transition'},{s:'V',n:23,c:'transition'},{s:'Cr',n:24,c:'transition'},{s:'Mn',n:25,c:'transition'},{s:'Fe',n:26,c:'transition'},{s:'Co',n:27,c:'transition'},{s:'Ni',n:28,c:'transition'},{s:'Cu',n:29,c:'transition'},{s:'Zn',n:30,c:'transition'},{s:'Ga',n:31,c:'metal'},{s:'Ge',n:32,c:'metalloid'},{s:'As',n:33,c:'metalloid'},{s:'Se',n:34,c:'nonmetal'},{s:'Br',n:35,c:'nonmetal'},{s:'Kr',n:36,c:'noble'},
+    {s:'Rb',n:37,c:'metal'},{s:'Sr',n:38,c:'metal'},{s:'Y',n:39,c:'transition'},{s:'Zr',n:40,c:'transition'},{s:'Nb',n:41,c:'transition'},{s:'Mo',n:42,c:'transition'},{s:'Tc',n:43,c:'transition'},{s:'Ru',n:44,c:'transition'},{s:'Rh',n:45,c:'transition'},{s:'Pd',n:46,c:'transition'},{s:'Ag',n:47,c:'transition'},{s:'Cd',n:48,c:'transition'},{s:'In',n:49,c:'metal'},{s:'Sn',n:50,c:'metal'},{s:'Sb',n:51,c:'metalloid'},{s:'Te',n:52,c:'metalloid'},{s:'I',n:53,c:'nonmetal'},{s:'Xe',n:54,c:'noble'},
+    {s:'Cs',n:55,c:'metal'},{s:'Ba',n:56,c:'metal'},{s:'*',n:null,c:'lanthanide'},{s:'Hf',n:72,c:'transition'},{s:'Ta',n:73,c:'transition'},{s:'W',n:74,c:'transition'},{s:'Re',n:75,c:'transition'},{s:'Os',n:76,c:'transition'},{s:'Ir',n:77,c:'transition'},{s:'Pt',n:78,c:'transition'},{s:'Au',n:79,c:'transition'},{s:'Hg',n:80,c:'transition'},{s:'Tl',n:81,c:'metal'},{s:'Pb',n:82,c:'metal'},{s:'Bi',n:83,c:'metal'},{s:'Po',n:84,c:'metalloid'},{s:'At',n:85,c:'nonmetal'},{s:'Rn',n:86,c:'noble'},
+    {s:'Fr',n:87,c:'metal'},{s:'Ra',n:88,c:'metal'},{s:'**',n:null,c:'actinide'},{s:'Rf',n:104,c:'transition'},{s:'Db',n:105,c:'transition'},{s:'Sg',n:106,c:'transition'},{s:'Bh',n:107,c:'transition'},{s:'Hs',n:108,c:'transition'},{s:'Mt',n:109,c:'transition'},{s:'Ds',n:110,c:'transition'},{s:'Rg',n:111,c:'transition'},{s:'Cn',n:112,c:'transition'},{s:'Nh',n:113,c:'metal'},{s:'Fl',n:114,c:'metal'},{s:'Mc',n:115,c:'metal'},{s:'Lv',n:116,c:'metal'},{s:'Ts',n:117,c:'nonmetal'},{s:'Og',n:118,c:'noble'},
+  ];
+  const g=document.getElementById('ptGrid');
+  const colorMap={nonmetal:'nonmetal',noble:'noble',metal:'metal',metalloid:'metalloid',transition:'transition',lanthanide:'lanthanide',actinide:'actinide'};
+  // Row 1 needs gap
+  const layout=[];
+  // Build proper PT layout with gaps
+  const ptRows=[
+    [{s:'H',n:1,c:'nonmetal'},null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,{s:'He',n:2,c:'noble'}],
+    [{s:'Li',n:3,c:'metal'},{s:'Be',n:4,c:'metal'},null,null,null,null,null,null,null,null,null,null,{s:'B',n:5,c:'metalloid'},{s:'C',n:6,c:'nonmetal'},{s:'N',n:7,c:'nonmetal'},{s:'O',n:8,c:'nonmetal'},{s:'F',n:9,c:'nonmetal'},{s:'Ne',n:10,c:'noble'}],
+    [{s:'Na',n:11,c:'metal'},{s:'Mg',n:12,c:'metal'},null,null,null,null,null,null,null,null,null,null,{s:'Al',n:13,c:'metal'},{s:'Si',n:14,c:'metalloid'},{s:'P',n:15,c:'nonmetal'},{s:'S',n:16,c:'nonmetal'},{s:'Cl',n:17,c:'nonmetal'},{s:'Ar',n:18,c:'noble'}],
+    [{s:'K',n:19,c:'metal'},{s:'Ca',n:20,c:'metal'},{s:'Sc',n:21,c:'transition'},{s:'Ti',n:22,c:'transition'},{s:'V',n:23,c:'transition'},{s:'Cr',n:24,c:'transition'},{s:'Mn',n:25,c:'transition'},{s:'Fe',n:26,c:'transition'},{s:'Co',n:27,c:'transition'},{s:'Ni',n:28,c:'transition'},{s:'Cu',n:29,c:'transition'},{s:'Zn',n:30,c:'transition'},{s:'Ga',n:31,c:'metal'},{s:'Ge',n:32,c:'metalloid'},{s:'As',n:33,c:'metalloid'},{s:'Se',n:34,c:'nonmetal'},{s:'Br',n:35,c:'nonmetal'},{s:'Kr',n:36,c:'noble'}],
+    [{s:'Rb',n:37,c:'metal'},{s:'Sr',n:38,c:'metal'},{s:'Y',n:39,c:'transition'},{s:'Zr',n:40,c:'transition'},{s:'Nb',n:41,c:'transition'},{s:'Mo',n:42,c:'transition'},{s:'Tc',n:43,c:'transition'},{s:'Ru',n:44,c:'transition'},{s:'Rh',n:45,c:'transition'},{s:'Pd',n:46,c:'transition'},{s:'Ag',n:47,c:'transition'},{s:'Cd',n:48,c:'transition'},{s:'In',n:49,c:'metal'},{s:'Sn',n:50,c:'metal'},{s:'Sb',n:51,c:'metalloid'},{s:'Te',n:52,c:'metalloid'},{s:'I',n:53,c:'nonmetal'},{s:'Xe',n:54,c:'noble'}],
+    [{s:'Cs',n:55,c:'metal'},{s:'Ba',n:56,c:'metal'},{s:'La*',n:57,c:'lanthanide'},{s:'Hf',n:72,c:'transition'},{s:'Ta',n:73,c:'transition'},{s:'W',n:74,c:'transition'},{s:'Re',n:75,c:'transition'},{s:'Os',n:76,c:'transition'},{s:'Ir',n:77,c:'transition'},{s:'Pt',n:78,c:'transition'},{s:'Au',n:79,c:'transition'},{s:'Hg',n:80,c:'transition'},{s:'Tl',n:81,c:'metal'},{s:'Pb',n:82,c:'metal'},{s:'Bi',n:83,c:'metal'},{s:'Po',n:84,c:'metalloid'},{s:'At',n:85,c:'nonmetal'},{s:'Rn',n:86,c:'noble'}],
+    [{s:'Fr',n:87,c:'metal'},{s:'Ra',n:88,c:'metal'},{s:'Ac**',n:89,c:'actinide'},{s:'Rf',n:104,c:'transition'},{s:'Db',n:105,c:'transition'},{s:'Sg',n:106,c:'transition'},{s:'Bh',n:107,c:'transition'},{s:'Hs',n:108,c:'transition'},{s:'Mt',n:109,c:'transition'},{s:'Ds',n:110,c:'transition'},{s:'Rg',n:111,c:'transition'},{s:'Cn',n:112,c:'transition'},{s:'Nh',n:113,c:'metal'},{s:'Fl',n:114,c:'metal'},{s:'Mc',n:115,c:'metal'},{s:'Lv',n:116,c:'metal'},{s:'Ts',n:117,c:'nonmetal'},{s:'Og',n:118,c:'noble'}],
+  ];
+  ptRows.forEach(row=>{
+    row.forEach(el=>{
+      const d=document.createElement('div');
+      if(!el){d.className='el el-gap';d.innerHTML='<span></span>';}
+      else{
+        d.className='el '+el.c;
+        d.innerHTML=`<span class="sym2">${el.s}</span><span class="num">${el.n||''}</span>`;
+        d.title=el.s;
+      }
+      g.appendChild(d);
+    });
+  });
+})();
+
+// ── HR DIAGRAM ──
+(function(){
+  const c=document.getElementById('hrCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width=600,H=c.height=420;
+  ctx.fillStyle='#03040a';ctx.fillRect(0,0,W,H);
+
+  // Axes labels
+  ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='11px Josefin Sans, sans-serif';
+  ctx.fillText('← Hotter    Temperature    Cooler →',120,H-8);
+  ctx.save();ctx.translate(14,H/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText('Dimmer ← Luminosity → Brighter',-(ctx.measureText('Dimmer ← Luminosity → Brighter').width/2),0);
+  ctx.restore();
+
+  // Main sequence band
+  const grad=ctx.createLinearGradient(80,30,W-60,H-40);
+  grad.addColorStop(0,'rgba(100,160,255,0.12)');
+  grad.addColorStop(0.5,'rgba(255,220,100,0.1)');
+  grad.addColorStop(1,'rgba(255,80,40,0.12)');
+  ctx.beginPath();
+  ctx.moveTo(90,35);ctx.quadraticCurveTo(250,130,W-60,H-45);
+  ctx.quadraticCurveTo(W-50,H-30,W-40,H-50);
+  ctx.quadraticCurveTo(260,120,110,22);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+
+  // Main sequence line
+  ctx.beginPath();ctx.moveTo(95,38);ctx.quadraticCurveTo(250,130,W-55,H-42);
+  ctx.strokeStyle='rgba(200,168,70,0.4)';ctx.lineWidth=2;ctx.stroke();
+
+  // Star clusters
+  const stars=[
+    {x:100,y:40,r:8,col:'#a0c0ff',lbl:'Blue giants'},
+    {x:160,y:80,r:6,col:'#c0d8ff',lbl:''},
+    {x:230,y:130,r:5,col:'#e8e8ff',lbl:''},
+    {x:300,y:190,r:5,col:'#fff4c0',lbl:'Sun ☀',sun:true},
+    {x:380,y:260,r:4,col:'#ffd080',lbl:''},
+    {x:460,y:330,r:4,col:'#ff9060',lbl:''},
+    {x:520,y:370,r:3,col:'#ff6040',lbl:'Red dwarfs'},
+    // Giant branch
+    {x:480,y:80,r:16,col:'#ff7030',lbl:'Red giants'},
+    {x:430,y:60,r:20,col:'#ff5020',lbl:'Supergiants'},
+    // White dwarfs
+    {x:130,y:330,r:3,col:'#d0e8ff',lbl:'White dwarfs'},
+    {x:160,y:350,r:2,col:'#c8e0ff',lbl:''},
+    {x:100,y:360,r:2,col:'#d8eeff',lbl:''},
+  ];
+  stars.forEach(s=>{
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=s.col;
+    ctx.shadowBlur=s.r*3;ctx.shadowColor=s.col;
+    ctx.fill();ctx.shadowBlur=0;
+    if(s.lbl){
+      ctx.fillStyle=s.sun?'#c8a846':'rgba(255,255,255,0.8)';
+      ctx.font=s.sun?'bold 11px Josefin Sans':'10px Josefin Sans';
+      ctx.fillText(s.lbl,s.x+s.r+4,s.y+4);
+    }
+  });
+
+  // Labels
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='10px Josefin Sans';
+  ctx.fillText('Main Sequence',260,215);
+})();
+
+// ── SOLAR SYSTEM ──
+(function(){
+  const c=document.getElementById('solarCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.fillStyle='#02030a';ctx.fillRect(0,0,W,H);
+
+  const bodies=[
+    {name:'☀',x:40,r:24,col:'#ffcc40',glow:'rgba(255,180,40,0.6)'},
+    {name:'Me',x:110,r:4,col:'#a08070'},
+    {name:'Ve',x:155,r:7,col:'#e8c080'},
+    {name:'Ea',x:205,r:8,col:'#4090e0',atm:true},
+    {name:'Ma',x:260,r:6,col:'#d06040'},
+    {name:'Ju',x:360,r:20,col:'#c8a060'},
+    {name:'Sa',x:470,r:16,col:'#e0c880',ring:true},
+    {name:'Ur',x:570,r:11,col:'#80c0d8'},
+    {name:'Ne',x:650,r:10,col:'#5080e0'},
+  ];
+
+  bodies.forEach(b=>{
+    if(b.glow){ctx.shadowBlur=30;ctx.shadowColor=b.glow}
+    ctx.beginPath();ctx.arc(b.x,H/2,b.r,0,Math.PI*2);
+    ctx.fillStyle=b.col;ctx.fill();
+    if(b.ring){
+      ctx.beginPath();ctx.ellipse(b.x,H/2,b.r+10,4,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(224,200,128,0.5)';ctx.lineWidth=3;ctx.stroke();
+    }
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='9px Josefin Sans';
+    ctx.textAlign='center';ctx.fillText(b.name,b.x,H/2+b.r+12);
+  });
+})();
+
+// ── COSMIC WEB ──
+(function(){
+  const c=document.getElementById('webCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width=600,H=c.height=250;
+  ctx.fillStyle='#02030a';ctx.fillRect(0,0,W,H);
+
+  // Generate nodes (galaxy clusters at intersections)
+  const nodes=[];
+  for(let i=0;i<28;i++)nodes.push({x:30+Math.random()*(W-60),y:20+Math.random()*(H-40),r:Math.random()*3+1,bright:Math.random()>0.7});
+  // Draw filaments between nearby nodes
+  nodes.forEach((a,i)=>{
+    nodes.forEach((b,j)=>{
+      if(j<=i)return;
+      const d=Math.hypot(b.x-a.x,b.y-a.y);
+      if(d<160){
+        const alpha=0.03+0.12*(1-d/160);
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(200,168,70,${alpha})`;ctx.lineWidth=d<80?0.8:0.4;ctx.stroke();
+      }
+    });
+  });
+  // Draw nodes
+  nodes.forEach(n=>{
+    ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+    ctx.fillStyle=n.bright?'#c8a846':'rgba(200,168,70,0.4)';
+    if(n.bright){ctx.shadowBlur=8;ctx.shadowColor='rgba(200,168,70,0.6)'}
+    ctx.fill();ctx.shadowBlur=0;
+  });
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='10px Josefin Sans';
+  ctx.fillText('Schematic: galaxy clusters (nodes) connected by dark-matter filaments, separated by voids',10,H-8);
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     STICKY MINI DRAKE LOOPER — fixed bottom audio player
+══════════════════════════════════════════════════════════ -->
+<style>
+/* ── MINI LOOPER BAR ── */
+#mini-looper {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 900;
+  background: rgba(6,5,4,0.97);
+  border-top: 1px solid rgba(200,168,75,0.25);
+  backdrop-filter: blur(12px);
+  font-family: 'Josefin Sans', sans-serif;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+#mini-looper.collapsed { transform: translateY(calc(100% - 36px)); }
+
+/* Toggle tab */
+.ml-tab {
+  height: 36px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(200,168,75,0.1);
+  user-select: none;
+}
+.ml-tab-left { display: flex; align-items: center; gap: 12px; }
+.ml-tab-label { font-size: 0.5rem; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(200,168,75,0.7); }
+.ml-tab-eq { font-size: 0.5rem; color: rgba(255,255,255,0.45); letter-spacing: 0.05em; }
+.ml-tab-right { display: flex; align-items: center; gap: 14px; }
+.ml-n-display { font-size: 0.5rem; color: rgba(200,168,70,0.6); letter-spacing: 0.08em; }
+.ml-n-val { color: #c8a846; font-size: 0.75rem; }
+.ml-chevron { font-size: 0.7rem; color: rgba(200,168,75,0.5); transition: transform 0.3s; }
+#mini-looper.collapsed .ml-chevron { transform: rotate(180deg); }
+
+/* Body */
+.ml-body {
+  padding: 10px 20px 12px;
+  display: flex; align-items: center; gap: 0;
+}
+
+/* Play button */
+.ml-play {
+  font-family: inherit; font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 8px 16px; border: 1px solid rgba(200,168,75,0.25);
+  background: transparent; color: rgba(200,168,75,0.7); cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0; margin-right: 16px;
+  white-space: nowrap;
+}
+.ml-play:hover { border-color: #c8a846; color: #c8a846; }
+.ml-play.on { background: #c8a846; color: #060504; border-color: #c8a846; }
+
+/* Strips container */
+.ml-strips { display: flex; flex: 1; gap: 0; }
+
+/* Individual strip */
+.ml-strip {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 6px 4px;
+  border-left: 1px solid rgba(200,168,75,0.08);
+  cursor: pointer; position: relative;
+  transition: background 0.2s;
+}
+.ml-strip:first-child { border-left: none; }
+.ml-strip::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: #c8a846; opacity: 0; transition: opacity 0.2s;
+}
+.ml-strip.active { background: rgba(200,168,75,0.05); }
+.ml-strip.active::before { opacity: 1; }
+
+.ml-sym {
+  font-size: 0.7rem; font-weight: 700; color: rgba(200,168,75,0.4);
+  line-height: 1; margin-bottom: 4px; transition: color 0.2s;
+}
+.ml-strip.active .ml-sym { color: #E8C96A; }
+
+.ml-led {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); margin-bottom: 4px;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.ml-strip.active .ml-led { background: #c8a846; box-shadow: 0 0 5px #c8a846; }
+
+/* Mini knob */
+.ml-knob-wrap { width: 36px; height: 36px; cursor: ns-resize; touch-action: none; flex-shrink: 0; }
+.ml-knob-svg { width: 36px; height: 36px; overflow: visible; display: block; }
+.ml-k-track { fill: none; stroke: rgba(200,168,75,0.08); stroke-width: 3; stroke-linecap: round; }
+.ml-k-arc   { fill: none; stroke: rgba(200,168,75,0.3); stroke-width: 3; stroke-linecap: round; transition: stroke 0.2s; }
+.ml-k-nub   { fill: rgba(200,168,75,0.4); transition: fill 0.2s; }
+.ml-strip.active .ml-k-arc { stroke: #c8a846; }
+.ml-strip.active .ml-k-nub { fill: #E8C96A; }
+
+.ml-val {
+  font-size: 0.4rem; color: rgba(200,168,75,0.4);
+  text-align: center; margin-top: 3px; line-height: 1.2;
+  transition: color 0.2s; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ml-strip.active .ml-val { color: #c8a846; }
+
+/* Beat canvas */
+.ml-beats-wrap { width: 80px; flex-shrink: 0; margin-left: 14px; }
+#mlBeats { width: 100%; height: 16px; display: block; }
+
+/* Full engine link */
+.ml-full-link {
+  flex-shrink: 0; margin-left: 14px;
+  font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(200,168,75,0.5); text-decoration: none;
+  border: 1px solid rgba(200,168,75,0.15); padding: 6px 12px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.ml-full-link:hover { color: #c8a846; border-color: rgba(200,168,75,0.4); }
+
+/* Back link */
+.ml-back {
+  flex-shrink: 0; margin-left: 8px;
+  font-size: 0.48rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.ml-back:hover { color: rgba(255,255,255,0.8); border-color: rgba(200,168,75,0.25); }
+
+/* Add bottom padding to page so content isn't hidden */
+body { padding-bottom: 130px; }
+</style>
+
+<!-- MINI LOOPER HTML -->
+<div id="mini-looper" class="collapsed">
+  <!-- Tab / header (click to expand/collapse) -->
+  <div class="ml-tab" onclick="mlToggleCollapse()">
+    <div class="ml-tab-left">
+      <span class="ml-tab-label">Drake Equation Looper</span>
+      <span class="ml-tab-eq">N = R★ · fₚ · nₑ · fₗ · fᵢ · fᶜ · L</span>
+    </div>
+    <div class="ml-tab-right">
+      <span class="ml-n-display">N ≈ <span class="ml-n-val" id="mlNNum">—</span></span>
+      <span class="ml-chevron">▲</span>
+    </div>
+  </div>
+  <!-- Body (strips + controls) -->
+  <div class="ml-body">
+    <button class="ml-play" id="mlPlayBtn" onclick="mlToggleMaster()">▶ Begin</button>
+    <div class="ml-strips" id="mlStrips"><!-- built by JS --></div>
+    <div class="ml-beats-wrap"><canvas id="mlBeats"></canvas></div>
+    <a href="v6looper.html" class="ml-full-link">Full Engine ↗</a>
+    <a href="index.html" class="ml-back">← Home</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// MINI LOOPER — self-contained audio engine
+// ═══════════════════════════════════════════════════════
+
+// Collapse toggle
+function mlToggleCollapse() {
+  document.getElementById('mini-looper').classList.toggle('collapsed');
+}
+
+const ML_VARS = [
+  { key:'R',  sym:'R★', name:'Star formation', unit:'stars/yr', min:0.5,    max:10,      step:0.01,   def:1.5 },
+  { key:'fp', sym:'fₚ', name:'Planets',         unit:'fraction', min:0.1,    max:1,       step:0.001,  def:0.92 },
+  { key:'ne', sym:'nₑ', name:'Habitable worlds',unit:'worlds',   min:0.1,    max:5,       step:0.01,   def:0.4 },
+  { key:'fl', sym:'fₗ', name:'Life arises',      unit:'fraction', min:0.0001, max:1,       step:0.0001, def:0.13 },
+  { key:'fi', sym:'fᵢ', name:'Intelligence',     unit:'fraction', min:0.0001, max:1,       step:0.0001, def:0.01 },
+  { key:'fc', sym:'fᶜ', name:'Communicates',     unit:'fraction', min:0.0001, max:1,       step:0.0001, def:0.1 },
+  { key:'L',  sym:'L',  name:'Civilization life',unit:'years',    min:100,    max:1000000, step:10,     def:10000 }
+];
+
+function mlGetVar(k) { return ML_VARS.find(v => v.key === k); }
+
+const mlState = {};
+ML_VARS.forEach(v => { mlState[v.key] = { active: false, val: v.def }; });
+
+let mlAudioCtx = null, mlMasterGain = null, mlAnalyser = null;
+let mlPlaying = false, mlSchTimer = null, mlNextStep = 0, mlStepCount = 0, mlAnimId = null;
+const ML_ROOT = 432;
+const ML_BEAT_CELLS = 16;
+let mlBeatGrid = new Array(ML_BEAT_CELLS).fill(0), mlCurBeat = 0;
+let mlPatterns = { fp:[], ne:[], fl:[], fi:[], fc:[] };
+
+function mlVToNorm(k, val) {
+  const v = mlGetVar(k);
+  if (k === 'L') return (Math.log(val)-Math.log(v.min))/(Math.log(v.max)-Math.log(v.min));
+  return (val-v.min)/(v.max-v.min);
+}
+function mlNormToVal(k, n) {
+  const v = mlGetVar(k);
+  let val;
+  if (k === 'L') val = Math.exp(Math.log(v.min)+n*(Math.log(v.max)-Math.log(v.min)));
+  else val = v.min + n*(v.max-v.min);
+  val = Math.round(val/v.step)*v.step;
+  return Math.max(v.min, Math.min(v.max, val));
+}
+function mlGetBPM() { return 40 + mlVToNorm('R', mlState.R.val)*100; }
+function mlStepDur() { return (60/mlGetBPM())/4; }
+
+function mlFmtVal(k) {
+  const v = mlGetVar(k), val = mlState[k].val;
+  if (v.unit === 'fraction') return val < 0.01 ? val.toFixed(4) : val.toFixed(2);
+  if (val >= 1000) return (val/1000).toFixed(1)+'k';
+  return val.toFixed(1);
+}
+
+function mlGenPattern(density, len=64) {
+  let p = new Array(len).fill(false);
+  let idx = Array.from({length:len},(_,i)=>i);
+  for (let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  for (let i=0;i<density;i++) p[idx[i]]=true;
+  return p;
+}
+function mlRollPatterns() {
+  mlPatterns.fp = mlGenPattern(Math.floor(1+mlVToNorm('fp',mlState.fp.val)*11)*4,64);
+  mlPatterns.ne = mlGenPattern(Math.floor(1+mlVToNorm('ne',mlState.ne.val)*3)*4,64);
+  mlPatterns.fl = mlGenPattern(Math.floor(1+mlVToNorm('fl',mlState.fl.val)*15)*4,64);
+  mlPatterns.fi = mlGenPattern(Math.floor(1+mlVToNorm('fi',mlState.fi.val)*15)*4,64);
+  mlPatterns.fc = mlGenPattern(Math.floor(1+mlVToNorm('fc',mlState.fc.val)*7)*4,64);
+}
+
+function mlInitAudio() {
+  if (mlAudioCtx) return;
+  mlAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  mlMasterGain = mlAudioCtx.createGain(); mlMasterGain.gain.value = 0;
+  mlAnalyser = mlAudioCtx.createAnalyser(); mlAnalyser.fftSize = 1024;
+  mlMasterGain.connect(mlAnalyser); mlAnalyser.connect(mlAudioCtx.destination);
+}
+
+function mlPlayTone(freq, time, dur, vol, type='sine') {
+  const osc = mlAudioCtx.createOscillator(), gain = mlAudioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  if (type==='square'||type==='sawtooth') {
+    const f = mlAudioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1800;
+    osc.connect(f); f.connect(gain);
+  } else osc.connect(gain);
+  gain.gain.setValueAtTime(0,time);
+  gain.gain.linearRampToValueAtTime(vol,time+0.03);
+  gain.gain.setTargetAtTime(0.001,time+0.03,dur/3);
+  gain.connect(mlMasterGain); osc.start(time); osc.stop(time+dur+0.5);
+}
+
+const ML_SCALES = [
+  [0],[0,7],[0,3,5,7,10],[0,2,4,7,9],[0,2,3,5,7,9,10],[0,2,4,6,7,9,11],[0,2,4,6,8,10],[0,1,2,3,4,5,6,7,8,9,10,11]
+];
+let mlMelIdx = 0;
+function mlScalePitch(t) {
+  const idx = Math.min(ML_SCALES.length-1, Math.floor(t*ML_SCALES.length));
+  const scale = ML_SCALES[idx]; mlMelIdx += 3;
+  return scale[mlMelIdx % scale.length];
+}
+
+function mlScheduleStep(time, step) {
+  if (!mlPlaying) return;
+  const sd = mlStepDur(), bd = sd*4, s64 = step%64;
+  if (s64===0) mlRollPatterns();
+  if (step%4===0) {
+    const cell = (step/4)%ML_BEAT_CELLS;
+    setTimeout(()=>{ mlBeatGrid[cell]=1.0; mlCurBeat=cell; }, (time-mlAudioCtx.currentTime)*1000);
+  }
+  if (mlState.R.active && step%4===0) mlPlayTone(ML_ROOT/4, time, bd*0.8, 0.7, 'triangle');
+  if (mlState.fp.active && mlPatterns.fp[s64]) mlPlayTone((ML_ROOT/2)*Math.pow(2,(s64%12)/12), time, bd*0.3, 0.4, 'sine');
+  if (mlState.ne.active && mlPatterns.ne[s64]) mlPlayTone((ML_ROOT/2)*(0.8+mlVToNorm('ne',mlState.ne.val)*0.4), time, bd*2, 0.25, 'sine');
+  if (mlState.fl.active && mlPatterns.fl[s64]) mlPlayTone(ML_ROOT*1.5, time, sd*1.5, 0.35, 'square');
+  if (mlState.fi.active && mlPatterns.fi[s64]) {
+    const p = mlScalePitch(mlVToNorm('fi',mlState.fi.val));
+    mlPlayTone(ML_ROOT*Math.pow(2,p/12), time+(Math.random()*bd), bd*0.5, 0.35, 'triangle');
+  }
+  if (mlState.fc.active && mlPatterns.fc[s64]) {
+    const h=1+Math.floor(Math.random()*5), ft=time+(Math.random()*bd*2);
+    mlPlayTone(ML_ROOT*h, ft, 0.05, 0.15, 'sine');
+    if (Math.random()>0.6) mlPlayTone(ML_ROOT*h, ft+0.1, 0.05, 0.1, 'sine');
+  }
+  if (mlState.L.active && step%64===0) mlPlayTone(ML_ROOT/8, time, 2+mlVToNorm('L',mlState.L.val)*15, 0.8, 'sine');
+}
+
+function mlScheduler() {
+  if (!mlAudioCtx) return;
+  const now = mlAudioCtx.currentTime;
+  while (mlNextStep < now+0.05) { mlScheduleStep(mlNextStep, mlStepCount); mlNextStep+=mlStepDur(); mlStepCount++; }
+}
+
+function mlToggleMaster() {
+  mlInitAudio();
+  if (mlAudioCtx.state==='suspended') mlAudioCtx.resume();
+  const btn = document.getElementById('mlPlayBtn');
+  if (!mlPlaying) {
+    mlPlaying = true; btn.textContent='■ Stop'; btn.classList.add('on');
+    mlNextStep = mlAudioCtx.currentTime+0.1; mlStepCount=0; mlMelIdx=0;
+    mlRollPatterns();
+    mlSchTimer = setInterval(mlScheduler, 25);
+    mlMasterGain.gain.setTargetAtTime(0.7, mlAudioCtx.currentTime, 0.5);
+    mlDrawBeats();
+    // Auto-expand when playing
+    document.getElementById('mini-looper').classList.remove('collapsed');
+  } else {
+    const stepsLeft = 64-(mlStepCount%64);
+    const rideOut = stepsLeft*mlStepDur();
+    btn.textContent='… Fading'; btn.disabled=true;
+    setTimeout(()=>{
+      mlPlaying=false; clearInterval(mlSchTimer); mlSchTimer=null;
+      mlMasterGain.gain.setTargetAtTime(0, mlAudioCtx.currentTime, 0.1);
+      if (mlAnimId){cancelAnimationFrame(mlAnimId);mlAnimId=null;}
+      btn.textContent='▶ Begin'; btn.classList.remove('on'); btn.disabled=false;
+      const c=document.getElementById('mlBeats');
+      if(c) c.getContext('2d').clearRect(0,0,c.width,c.height);
+    }, rideOut*1000);
+  }
+}
+
+function mlToggleVoice(k) {
+  mlInitAudio();
+  if (mlAudioCtx.state==='suspended') mlAudioCtx.resume();
+  mlState[k].active = !mlState[k].active;
+  document.querySelectorAll('.ml-strip[data-key="'+k+'"]').forEach(s=>s.classList.toggle('active', mlState[k].active));
+  mlUpdateN();
+}
+
+function mlUpdateN() {
+  const active = ML_VARS.filter(v=>mlState[v.key].active);
+  const el = document.getElementById('mlNNum');
+  if (!active.length) { if(el) el.textContent='—'; return; }
+  const N = active.reduce((acc,v)=>acc*mlState[v.key].val, 1);
+  let d = N>=1e9?(N/1e9).toFixed(2)+'B':N>=1e6?(N/1e6).toFixed(2)+'M':N>=1e3?(N/1e3).toFixed(2)+'k':N<0.001?N.toExponential(2):N.toPrecision(3);
+  if(el) el.textContent=d;
+}
+
+// ── KNOB GEOMETRY ──
+const ML_KCX=18,ML_KCY=18,ML_KR=13,ML_KS=Math.PI*0.75,ML_KE=Math.PI*2.25,ML_KRN=ML_KE-ML_KS;
+function mlKAngle(n){return ML_KS+n*ML_KRN;}
+function mlKXY(a){return{x:ML_KCX+ML_KR*Math.cos(a),y:ML_KCY+ML_KR*Math.sin(a)};}
+function mlKArcPath(n){const s=mlKXY(ML_KS),e=mlKXY(mlKAngle(n)),lg=(n*ML_KRN)>Math.PI?1:0;return `M${s.x} ${s.y} A${ML_KR} ${ML_KR} 0 ${lg} 1 ${e.x} ${e.y}`;}
+function mlKnobSVG(id,n){const pos=mlKXY(mlKAngle(n));return `<svg class="ml-knob-svg" viewBox="0 0 36 36"><circle cx="${ML_KCX}" cy="${ML_KCY}" r="${ML_KR}" class="ml-k-track"/><path id="mlarc-${id}" class="ml-k-arc" d="${mlKArcPath(n)}"/><circle id="mlnub-${id}" class="ml-k-nub" r="2.5" cx="${pos.x}" cy="${pos.y}"/></svg>`;}
+function mlRefreshKnob(id,n){
+  const nc=Math.max(0.001,Math.min(1,n));
+  const arc=document.getElementById('mlarc-'+id),nub=document.getElementById('mlnub-'+id);
+  if(arc) arc.setAttribute('d',mlKArcPath(nc));
+  if(nub){const p=mlKXY(mlKAngle(nc));nub.setAttribute('cx',p.x);nub.setAttribute('cy',p.y);}
+}
+
+let mlDrag=null;
+function mlKnobDown(e,k){
+  e.preventDefault(); e.stopPropagation();
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  mlDrag={k,startY:cy,startNorm:mlVToNorm(k,mlState[k].val)};
+}
+window.addEventListener('mousemove',e=>{
+  if(!mlDrag)return;
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  const delta=(mlDrag.startY-cy)/120;
+  const newNorm=Math.max(0,Math.min(1,mlDrag.startNorm+delta));
+  mlState[mlDrag.k].val=mlNormToVal(mlDrag.k,newNorm);
+  mlRefreshKnob(mlDrag.k,newNorm);
+  const valEl=document.getElementById('mlval-'+mlDrag.k);
+  if(valEl) valEl.textContent=mlFmtVal(mlDrag.k);
+  mlUpdateN();
+});
+window.addEventListener('mouseup',()=>mlDrag=null);
+window.addEventListener('touchmove',e=>{
+  if(!mlDrag)return;
+  const cy=e.touches[0].clientY;
+  const delta=(mlDrag.startY-cy)/120;
+  const newNorm=Math.max(0,Math.min(1,mlDrag.startNorm+delta));
+  mlState[mlDrag.k].val=mlNormToVal(mlDrag.k,newNorm);
+  mlRefreshKnob(mlDrag.k,newNorm);
+  const valEl=document.getElementById('mlval-'+mlDrag.k);
+  if(valEl) valEl.textContent=mlFmtVal(mlDrag.k);
+  mlUpdateN();
+},{passive:false});
+window.addEventListener('touchend',()=>mlDrag=null);
+
+// ── BEAT VISUALIZER ──
+function mlDrawBeats() {
+  const canvas=document.getElementById('mlBeats'); if(!canvas)return;
+  const c=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr; c.scale(dpr,dpr);
+  function frame(){
+    if(!mlPlaying)return;
+    mlAnimId=requestAnimationFrame(frame);
+    const W=canvas.offsetWidth,H=canvas.offsetHeight;
+    c.clearRect(0,0,W,H);
+    const cw=(W-1)/ML_BEAT_CELLS;
+    for(let i=0;i<ML_BEAT_CELLS;i++){
+      const bright=mlBeatGrid[i];
+      c.fillStyle=`rgba(200,168,75,${0.05+bright*0.5})`;
+      c.fillRect(i*cw+0.5,1,cw-1.5,H-2);
+      mlBeatGrid[i]=Math.max(0,mlBeatGrid[i]-0.05);
+    }
+    const cx=mlCurBeat*cw+cw/2;
+    c.strokeStyle='rgba(200,168,75,0.25)'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(cx,0); c.lineTo(cx,H); c.stroke();
+  }
+  frame();
+}
+
+// ── BUILD UI ──
+(function mlBuildUI(){
+  const container=document.getElementById('mlStrips');
+  ML_VARS.forEach(v=>{
+    const n0=mlVToNorm(v.key,v.def);
+    const strip=document.createElement('div');
+    strip.className='ml-strip'; strip.dataset.key=v.key;
+    strip.innerHTML=`
+      <div class="ml-sym">${v.sym}</div>
+      <div class="ml-led"></div>
+      <div class="ml-knob-wrap" onmousedown="mlKnobDown(event,'${v.key}')" ontouchstart="mlKnobDown(event,'${v.key}')">
+        ${mlKnobSVG(v.key,n0)}
+      </div>
+      <div class="ml-val" id="mlval-${v.key}">${mlFmtVal(v.key)}</div>
+    `;
+    strip.addEventListener('click', e=>{
+      if (!e.target.closest('.ml-knob-wrap')) mlToggleVoice(v.key);
+    });
+    container.appendChild(strip);
+  });
+})();
+</script>
+</body>
+</html>
