@@ -34,9 +34,9 @@
             display: flex; justify-content: space-between; align-items: flex-end;
             flex-shrink: 0;
         }
-        header h1 { font-family: var(--mono); font-size: clamp(1.4rem,3vw,2rem); font-weight:300; color:var(--text-bright); line-height:1.1; }
+        header h1 { font-family: var(--mono); font-size: clamp(1.8rem,3vw,2.4rem); font-weight:300; color:var(--text-bright); line-height:1.1; }
         header h1 em { font-style:normal; color:var(--gold); }
-        header p { font-size:0.52rem; letter-spacing:0.22em; color:var(--text); margin-top:5px; }
+        header p { font-size:0.74rem; letter-spacing:0.22em; color:var(--text); margin-top:5px; }
         
         .header-controls { display: flex; align-items: center; gap: 20px; }
         
@@ -53,7 +53,7 @@
         }
         .tuning-wrap input:focus { outline: none; border-bottom-color: var(--gold); }
 
-        .back-link { font-size:0.54rem; letter-spacing:0.16em; color:var(--text-dim); text-decoration:none; border:1px solid var(--gold-border); padding:7px 14px; transition:all 0.25s; }
+        .back-link { font-size:0.76rem; letter-spacing:0.16em; color:var(--text-dim); text-decoration:none; border:1px solid var(--gold-border); padding:7px 14px; transition:all 0.25s; }
         .back-link:hover { color:var(--gold); border-color:var(--gold); }
 
         /* ── GLOBAL TOP NAV ── */
@@ -67,7 +67,7 @@
           gap:16px;
         }
         .tn-logo{
-          font-family:var(--mono);font-size:0.58rem;letter-spacing:0.18em;
+          font-family:var(--mono);font-size:1.05rem;letter-spacing:0.18em;
           text-transform:uppercase;color:var(--gold);text-decoration:none;
           display:flex;align-items:center;gap:8px;white-space:nowrap;
           transition:opacity 0.2s;
@@ -76,7 +76,7 @@
         .tn-logo-mark{font-size:1rem;line-height:1}
         .tn-links{display:flex;align-items:center;gap:4px;}
         .tn-link{
-          font-family:var(--mono);font-size:0.52rem;letter-spacing:0.14em;
+          font-family:var(--mono);font-size:0.74rem;letter-spacing:0.14em;
           text-transform:uppercase;color:rgba(255,255,255,0.5);text-decoration:none;
           padding:5px 12px;border:1px solid transparent;
           transition:all 0.2s;white-space:nowrap;
@@ -87,14 +87,14 @@
         body { padding-top: 40px; }
 
         /* LAYOUT */
-        main { display:grid; grid-template-columns:1fr 360px; flex:1; min-height:0; }
+        main { display:grid; grid-template-columns:3fr 2fr; flex:1; min-height:0; }
 
         /* LEFT */
         .left { padding:24px 28px; border-right:1px solid var(--gold-border); overflow-y:auto; display:flex; flex-direction:column; gap:0; }
 
         .left-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-        .left-label { font-size:0.52rem; letter-spacing:0.26em; text-transform:uppercase; color:var(--text-dim); }
-        .play-btn { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.16em; padding:9px 22px; border:1px solid var(--gold-border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all 0.25s; }
+        .left-label { font-size:0.74rem; letter-spacing:0.26em; text-transform:uppercase; color:var(--text-dim); }
+        .play-btn { font-family:var(--mono); font-size:1.05rem; letter-spacing:0.16em; padding:9px 22px; border:1px solid var(--gold-border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all 0.25s; }
         .play-btn:hover { border-color:var(--gold); color:var(--gold); }
         .play-btn.on { background:var(--gold); color:#060605; border-color:var(--gold); }
 
@@ -107,7 +107,7 @@
             margin-bottom: 5px;
             position: relative;
             transition: background 0.25s, border-color 0.25s;
-            min-height: 80px;
+            min-height: 96px;
         }
         .strip::before { content:''; position:absolute; left:0;top:0;bottom:0;width:3px; background:var(--gold); opacity:0; transition:opacity 0.25s; }
         .strip.active { background:var(--bg-raised); border-color:rgba(200,168,75,0.36); }
@@ -119,7 +119,7 @@
             cursor:pointer; gap:7px; transition:background 0.2s;
         }
         .s-id:hover { background:var(--gold-pale); }
-        .s-sym { font-size:0.9rem; font-weight:700; color:var(--text); transition:color 0.25s; line-height:1; }
+        .s-sym { font-size:1.45rem; font-weight:700; color:var(--text); transition:color 0.25s; line-height:1; }
         .strip.active .s-sym { color:var(--gold-light); }
         .s-led { width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);transition:all 0.25s; }
         .strip.active .s-led { background:var(--gold); box-shadow:0 0 7px var(--gold); }
@@ -128,34 +128,34 @@
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             padding:12px 16px; gap:6px; border-right:1px solid var(--gold-border);
         }
-        .knob-role { font-size:0.44rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text); text-align:center; line-height:1.4; }
-        .knob-wrap { width:52px;height:52px;cursor:ns-resize;touch-action:none;flex-shrink:0; }
-        .knob-svg { width:52px;height:52px;overflow:visible;display:block; }
+        .knob-role { font-size:0.65rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--text); text-align:center; line-height:1.4; }
+        .knob-wrap { width:60px;height:60px;cursor:ns-resize;touch-action:none;flex-shrink:0; }
+        .knob-svg { width:60px;height:60px;overflow:visible;display:block; }
         .k-track { fill:none;stroke:rgba(200,168,75,0.1);stroke-width:4;stroke-linecap:round; }
         .k-arc   { fill:none;stroke:rgba(255,255,255,0.4);stroke-width:4;stroke-linecap:round;transition:stroke 0.25s; }
         .k-nub   { fill:rgba(255,255,255,0.6);transition:fill 0.25s; }
         .strip.active .k-arc { stroke:var(--gold); }
         .strip.active .k-nub { fill:var(--gold-light); }
-        .knob-val { font-size:0.54rem; color:var(--text); text-align:center; min-width:60px; transition:color 0.25s; }
+        .knob-val { font-size:0.76rem; color:var(--text); text-align:center; min-width:60px; transition:color 0.25s; }
         .strip.active .knob-val { color:var(--gold); }
 
         .s-info { display:flex; flex-direction:column; justify-content:center; padding:12px 14px; gap:4px; min-width:0; }
-        .s-name { font-family:var(--mono); font-size:0.8rem; font-style:normal; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color 0.25s; }
+        .s-name { font-family:var(--mono); font-size:1.05rem; font-style:normal; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color 0.25s; }
         .strip.active .s-name { color:var(--text); }
-        .s-role-desc { font-size:0.44rem; color:var(--text); line-height:1.5; opacity:0.75; }
+        .s-role-desc { font-size:0.65rem; color:var(--text); line-height:1.5; opacity:0.75; }
         .strip.active .s-role-desc { opacity:1; color:var(--text); }
-        .s-live { font-size:0.46rem; color:var(--text); margin-top:3px; transition:color 0.25s; opacity:0.65; }
+        .s-live { font-size:0.68rem; color:var(--text); margin-top:3px; transition:color 0.25s; opacity:0.65; }
         .strip.active .s-live { color:var(--gold-light); opacity:1; }
 
         /* RIGHT */
         .right { display:flex; flex-direction:column; overflow-y:auto; }
         .rsec { padding:18px 20px; border-bottom:1px solid var(--gold-border); flex-shrink:0; }
-        .rlabel { font-size:0.48rem; letter-spacing:0.28em; text-transform:uppercase; color:var(--text); margin-bottom:12px; }
+        .rlabel { font-size:1.5rem; letter-spacing:0.28em; text-transform:uppercase; color:var(--text); margin-bottom:12px; }
 
         .n-box { text-align:center; padding:16px; background:var(--gold-pale); border:1px solid var(--gold-border); margin-bottom:14px; }
-        .n-label { font-size:0.44rem; letter-spacing:0.14em; color:var(--text); margin-bottom:7px; }
-        .n-num { font-family:var(--mono); font-size:2.8rem; font-weight:300; color:var(--gold); line-height:1; }
-        .n-unit { font-size:0.46rem; color:var(--text); margin-top:6px; letter-spacing:0.1em; line-height:1.7; }
+        .n-label { font-size:0.65rem; letter-spacing:0.14em; color:var(--text); margin-bottom:7px; }
+        .n-num { font-family:var(--mono); font-size:3.2rem; font-weight:300; color:var(--gold); line-height:1; }
+        .n-unit { font-size:0.68rem; color:var(--text); margin-top:6px; letter-spacing:0.1em; line-height:1.7; }
 
         #beatCanvas { width:100%; height:48px; display:block; }
         #waveCanvas { width:100%; height:52px; display:block; }
@@ -163,19 +163,19 @@
         .vi-panel { flex:1; padding:18px 20px; border-bottom:1px solid var(--gold-border); overflow-y:auto; }
         .vi { display:none; }
         .vi.on { display:block; }
-        .vi-sym { font-size:1.3rem; font-weight:700; color:var(--gold); margin-bottom:4px; }
-        .vi-name { font-family:var(--mono); font-size:0.88rem; font-style:normal; color:var(--text); margin-bottom:8px; }
-        .vi-role { font-size:0.56rem; color:var(--gold); opacity:0.8; font-weight:700; margin-bottom:8px; letter-spacing:0.05em; }
-        .vi-body { font-size:0.54rem; color:var(--text); line-height:1.85; }
+        .vi-sym { font-size:2rem; font-weight:700; color:var(--gold); margin-bottom:4px; }
+        .vi-name { font-family:var(--mono); font-size:1.4rem; font-style:normal; color:var(--text); margin-bottom:8px; }
+        .vi-role { font-size:0.78rem; color:var(--gold); opacity:0.8; font-weight:700; margin-bottom:8px; letter-spacing:0.05em; }
+        .vi-body { font-size:0.76rem; color:var(--text); line-height:1.85; }
 
         .legend { padding:14px 20px; }
-        .lrow { display:flex; gap:8px; font-size:0.5rem; color:var(--text-dim); line-height:1.6; margin-bottom:7px; }
+        .lrow { display:flex; gap:8px; font-size:0.72rem; color:var(--text-dim); line-height:1.6; margin-bottom:7px; }
         .ldot { width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:4px;flex-shrink:0; }
 
-        .bottom { padding:10px 28px; border-top:1px solid var(--gold-border); display:flex; justify-content:space-between; align-items:center; font-size:0.5rem; color:var(--text-dim); flex-shrink:0; }
+        .bottom { padding:10px 28px; border-top:1px solid var(--gold-border); display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--text-dim); flex-shrink:0; }
         .kb { display:flex; gap:14px; }
         .kh { display:flex; align-items:center; gap:5px; }
-        .key { border:1px solid var(--gold-border); padding:2px 5px; font-size:0.44rem; }
+        .key { border:1px solid var(--gold-border); padding:2px 5px; font-size:0.65rem; }
 
         /* VIDEO PLACEHOLDER */
         .video-section {
@@ -306,7 +306,7 @@
     <div class="video-placeholder" id="videoContainer">
         <div class="video-icon">▶</div>
         <div>Demo video coming soon</div>
-        <div style="font-size:0.44rem;opacity:0.6;">Replace this placeholder with your YouTube embed link</div>
+        <div style="font-size:0.65rem;opacity:0.6;">Replace this placeholder with your YouTube embed link</div>
     </div>
 </div>
 
@@ -329,7 +329,7 @@
         <div class="modal-eq">N = R★ · fₚ · nₑ · fₗ · fᵢ · fᶜ · L</div>
 
         <div class="modal-var" style="padding-top:0;margin-bottom:18px;">
-            <div class="mv-head"><div class="mv-sym" style="font-size:0.8rem;">Modulation</div></div>
+            <div class="mv-head"><div class="mv-sym" style="font-size:1.05rem;">Modulation</div></div>
             <div class="mv-sci">The modulation section sweeps a selected variable's value automatically over time using a low-frequency oscillator (LFO). Scientific justification: several Drake Equation parameters are not static — they vary over cosmic timescales. R★ has declined since the peak of cosmic star formation (~10 billion years ago). fₗ and fᵢ may be time-dependent if life and intelligence take billions of years to emerge. L is particularly dynamic if civilizations undergo boom-collapse cycles. The modulation feature allows the listener to hear how a continuously varying parameter changes both the N estimate and the resulting sound texture, modeling the non-stationarity of these variables. LFO shapes (sine, triangle, sawtooth) represent different drift behaviors: gradual oscillation, linear ramp, or asymmetric change.</div>
         </div>
 
@@ -367,26 +367,26 @@
 
         <div class="vi-panel">
             <div class="rlabel">Variable Role</div>
-            <div id="viDefault" style="font-size:0.54rem;color:var(--text);font-style:normal;line-height:1.9;">
+            <div id="viDefault" style="font-size:0.76rem;color:var(--text);font-style:normal;line-height:1.9;">
                 Hover a variable to see its role.
             </div>
         </div>
 
         <div class="rsec">
             <div class="rlabel">Modulation — Automate a Knob Over Time</div>
-            <div style="font-size:0.5rem;color:var(--text);line-height:1.8;margin-bottom:10px;">
+            <div style="font-size:0.72rem;color:var(--text);line-height:1.8;margin-bottom:10px;">
                 Slowly sweeps one variable's value over time using a low-frequency oscillator (LFO). Useful for exploring how gradual changes in a parameter affect both the Drake Equation result and the sound output. See scientific justification in the About panel.
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <label style="font-size:0.46rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Target</label>
-                    <select id="modTarget" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.52rem;padding:4px 8px;flex:1;">
+                    <label style="font-size:0.68rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Target</label>
+                    <select id="modTarget" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.74rem;padding:4px 8px;flex:1;">
                         <option value="">— select variable —</option>
                     </select>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <label style="font-size:0.46rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Period</label>
-                    <select id="modPeriod" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.52rem;padding:4px 8px;flex:1;">
+                    <label style="font-size:0.68rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Period</label>
+                    <select id="modPeriod" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.74rem;padding:4px 8px;flex:1;">
                         <option value="4">4 s — rapid drift</option>
                         <option value="10">10 s — slow sweep</option>
                         <option value="20" selected>20 s — geological</option>
@@ -394,18 +394,18 @@
                     </select>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <label style="font-size:0.46rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Shape</label>
-                    <select id="modShape" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.52rem;padding:4px 8px;flex:1;">
+                    <label style="font-size:0.68rem;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;min-width:52px;">Shape</label>
+                    <select id="modShape" style="background:var(--bg);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:0.74rem;padding:4px 8px;flex:1;">
                         <option value="sine">Sine — rises and falls</option>
                         <option value="tri">Triangle — linear sweep</option>
                         <option value="saw">Sawtooth — ramp up, reset</option>
                         <option value="rsaw">Rev. Saw — ramp down, reset</option>
                     </select>
                 </div>
-                <button id="modBtn" onclick="toggleMod()" style="font-family:var(--mono);font-size:0.52rem;letter-spacing:0.14em;padding:7px 16px;border:1px solid var(--gold-border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.25s;text-transform:uppercase;width:100%;">
+                <button id="modBtn" onclick="toggleMod()" style="font-family:var(--mono);font-size:0.74rem;letter-spacing:0.14em;padding:7px 16px;border:1px solid var(--gold-border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.25s;text-transform:uppercase;width:100%;">
                     ◎ Engage Modulation
                 </button>
-                <div id="modStatus" style="font-size:0.46rem;color:var(--text-dim);text-align:center;min-height:14px;"></div>
+                <div id="modStatus" style="font-size:0.68rem;color:var(--text-dim);text-align:center;min-height:14px;"></div>
             </div>
         </div>
 
@@ -1037,7 +1037,7 @@ function buildUI(){
             <div class="vi-sym">${v.sym}</div>
             <div class="vi-name">${v.name}</div>
             <div class="vi-role">${v.musicalRole}</div>
-            <div class="vi-body">${v.sciDesc}<br><br><strong style="color:var(--gold);font-size:0.48rem;">SONIC MAPPING</strong><br>${v.roleDesc}</div>
+            <div class="vi-body">${v.sciDesc}<br><br><strong style="color:var(--gold);font-size:1.5rem;">SONIC MAPPING</strong><br>${v.roleDesc}</div>
         `;
         viPanel.appendChild(viEl);
     });
